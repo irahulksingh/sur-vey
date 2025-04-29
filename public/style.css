@@ -56,3 +56,22 @@ h1 {
 #results-table tr:nth-child(even) {
   background-color: #f2f2f2;
 }
+@media (max-width: 600px) {
+  .styled-dropdown, .next-btn, #submit-btn, .download-btn {
+    font-size: 1.1rem;
+    padding: 0.8rem;
+  }
+
+  .question h3 {
+    font-size: 1.1rem;
+  }
+
+  body {
+    padding: 0.5rem;
+  }
+
+  table th, table td {
+    padding: 0.4rem;
+    font-size: 0.9rem;
+  }
+}
