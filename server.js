@@ -1,44 +1,37 @@
-const express = require('express');
-const fs = require('fs-extra');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const path = require('path');
+const express = require("express");
+const bodyParser = require("body-parser");
+const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const RESULTS_FILE = path.join(__dirname, 'results.json');
-
-app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, "public")));
 
-let results = {};
-if (fs.existsSync(RESULTS_FILE)) {
-  results = fs.readJsonSync(RESULTS_FILE);
-}
+let allAnswers = [];
 
-function saveResults() {
-  fs.writeJsonSync(RESULTS_FILE, results, { spaces: 2 });
-}
-
-app.post('/submit', (req, res) => {
+app.post("/submit", (req, res) => {
   const answers = req.body;
+  allAnswers.push(answers);
+  res.json({ message: "Svar skickades!" });
+});
 
-  Object.keys(answers).forEach(question => {
-    if (!results[question]) results[question] = {};
-    Object.entries(answers[question]).forEach(([option, score]) => {
-      results[question][option] = (results[question][option] || 0) + parseInt(score);
+app.get("/results", (req, res) => {
+  const resultSummary = {};
+
+  allAnswers.forEach((response) => {
+    Object.entries(response).forEach(([qKey, options]) => {
+      if (!resultSummary[qKey]) resultSummary[qKey] = {};
+
+      Object.entries(options).forEach(([option, rank]) => {
+        if (!resultSummary[qKey][option]) resultSummary[qKey][option] = {};
+        if (!resultSummary[qKey][option][rank]) resultSummary[qKey][option][rank] = 0;
+
+        resultSummary[qKey][option][rank]++;
+      });
     });
   });
 
-  saveResults();
-  res.json({ message: 'Svar inskickat!' });
+  res.json(resultSummary);
 });
 
-app.get('/results', (req, res) => {
-  res.json(results);
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
