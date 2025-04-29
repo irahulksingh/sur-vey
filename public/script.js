@@ -109,65 +109,60 @@ function showQuestion(index) {
 }
 
 submitBtn.onclick = async () => {
-  try {
-    const res = await fetch("/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userAnswers)
+  const res = await fetch("/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(userAnswers)
+  });
+
+  const data = await res.json();
+  alert(data.message);
+
+  const response = await fetch("/results");
+  const resultData = await response.json();
+
+  const resultsContainer = document.getElementById("results-table");
+  resultsContainer.innerHTML = "";
+
+  let csvContent = "data:text/csv;charset=utf-8,";
+
+  Object.entries(resultData).forEach(([q, options], qIndex) => {
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    thead.innerHTML = `<tr><th>Fråga ${qIndex + 1}</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>`;
+    table.appendChild(thead);
+
+    csvContent += `\nFråga ${qIndex + 1},1,2,3,4,5\n`;
+
+    const tbody = document.createElement("tbody");
+    Object.entries(options).forEach(([option, value]) => {
+      const row = document.createElement("tr");
+      const rowData = [option];
+      for (let i = 1; i <= 5; i++) {
+        rowData.push(value[i] || 0);
+      }
+      row.innerHTML = `<td>${option}</td>` + rowData.slice(1).map(v => `<td>${v}</td>`).join("");
+      tbody.appendChild(row);
+      csvContent += rowData.join(",") + "\n";
     });
 
-    const text = await res.text();
-    console.log("Response from /submit:", text);
+    table.appendChild(tbody);
+    resultsContainer.appendChild(table);
+    resultsContainer.appendChild(document.createElement("br"));
+  });
 
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (jsonErr) {
-      alert("The server response is not valid JSON.");
-      console.error("JSON parse error from /submit:", jsonErr);
-      return;
-    }
-
-    alert(data.message);
-
-    const response = await fetch("/results");
-    const resultText = await response.text();
-    console.log("Response from /results:", resultText);
-
-    let resultData;
-    try {
-      resultData = JSON.parse(resultText);
-    } catch (err) {
-      alert("Could not load results – invalid JSON.");
-      console.error("JSON parse error from /results:", err);
-      return;
-    }
-
-    const resultsContainer = document.getElementById("results-table");
-    resultsContainer.innerHTML = "";
-
-    Object.entries(resultData).forEach(([q, options], qIndex) => {
-      const table = document.createElement("table");
-      const thead = document.createElement("thead");
-      thead.innerHTML = `<tr><th>Question ${qIndex + 1}</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>`;
-      table.appendChild(thead);
-
-      const tbody = document.createElement("tbody");
-      Object.entries(options).forEach(([option, value]) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${option}</td>` + [1, 2, 3, 4, 5].map(i => `<td>${value[i] || 0}</td>`).join("");
-        tbody.appendChild(row);
-      });
-
-      table.appendChild(tbody);
-      resultsContainer.appendChild(table);
-      resultsContainer.appendChild(document.createElement("br"));
-    });
-  } catch (err) {
-    console.error("Fetch error:", err);
-    alert("An error occurred during submission. Check the console for details.");
-  }
+  const downloadBtn = document.createElement("button");
+  downloadBtn.textContent = "Ladda ner resultat som CSV";
+  downloadBtn.onclick = () => {
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "survey_results.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  resultsContainer.appendChild(downloadBtn);
 };
-
 
 showQuestion(currentQuestion);
