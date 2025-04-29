@@ -199,7 +199,9 @@ submitBtn.onclick = async () => {
     resultsContainer.appendChild(table);
     resultsContainer.appendChild(document.createElement("br"));
   });
-
+  const isAdmin = prompt("Enter admin password") === "Survey-2025";
+  if (!isAdmin) {
+    document.querySelector(".download-btn")?.remove();
   if (isAdmin) {
     const downloadBtn = document.createElement("button");
     downloadBtn.textContent = languages[selectedLang].download;
@@ -214,9 +216,7 @@ submitBtn.onclick = async () => {
     };
     resultsContainer.appendChild(downloadBtn);
   }
-  const isAdmin = prompt("Enter admin password") === "Survey-2025";
-if (!isAdmin) {
-  document.querySelector(".download-btn")?.remove();
+  
 }
 };
 
