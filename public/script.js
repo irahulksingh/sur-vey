@@ -1,4 +1,4 @@
-const questions = [
+const questions = [ 
   "När du ska köpa leksaker, vart vänder du dig först?",
   "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?",
   "Vilken betalningsmetod föredrar du när du handlar leksaker online?",
@@ -31,7 +31,6 @@ const optionsList = [
 let currentQuestion = 0;
 const form = document.getElementById("survey-form");
 const submitBtn = document.getElementById("submit-btn");
-
 let userAnswers = {};
 
 function showQuestion(index) {
@@ -44,12 +43,30 @@ function showQuestion(index) {
   optionsDiv.className = "options";
 
   optionsList[index].forEach((opt, i) => {
-    optionsDiv.innerHTML += `
-      <label>
-        ${opt}
-        <input type="number" name="q${index}" min="1" max="5" data-option="${opt}" required>
-      </label><br>
-    `;
+    const select = document.createElement("select");
+    select.name = `q${index}-${i}`;
+    select.dataset.option = opt;
+    select.required = true;
+
+    const defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.textContent = "Välj rang (1–5)";
+    defaultOpt.disabled = true;
+    defaultOpt.selected = true;
+    select.appendChild(defaultOpt);
+
+    for (let r = 1; r <= 5; r++) {
+      const optEl = document.createElement("option");
+      optEl.value = r;
+      optEl.textContent = r;
+      select.appendChild(optEl);
+    }
+
+    const label = document.createElement("label");
+    label.textContent = opt;
+    label.appendChild(select);
+    optionsDiv.appendChild(label);
+    optionsDiv.appendChild(document.createElement("br"));
   });
 
   questionDiv.appendChild(optionsDiv);
@@ -59,17 +76,26 @@ function showQuestion(index) {
   nextBtn.textContent = "Nästa";
   nextBtn.type = "button";
   nextBtn.onclick = () => {
-    const inputs = form.querySelectorAll(`input[name="q${index}"]`);
+    const selects = form.querySelectorAll("select");
     const values = {};
+    const usedRanks = new Set();
     let valid = true;
-    inputs.forEach(input => {
-      if (!input.value) valid = false;
-      values[input.dataset.option] = input.value;
+
+    selects.forEach(select => {
+      const val = select.value;
+      if (!val || usedRanks.has(val)) {
+        valid = false;
+      } else {
+        usedRanks.add(val);
+        values[select.dataset.option] = parseInt(val);
+      }
     });
-    if (!valid) {
-      alert("Vänligen fyll i alla alternativ med värden 1–5.");
+
+    if (!valid || usedRanks.size !== 5) {
+      alert("Varje rang 1–5 måste användas exakt en gång.");
       return;
     }
+
     userAnswers[`q${index + 1}`] = values;
     currentQuestion++;
     if (currentQuestion < questions.length) {
@@ -92,25 +118,28 @@ submitBtn.onclick = async () => {
   const data = await res.json();
   alert(data.message);
 
-  const chartCanvas = document.getElementById("result-chart");
-  chartCanvas.style.display = "block";
   const response = await fetch("/results");
   const resultData = await response.json();
 
-  const labels = Object.keys(resultData["q1"]);
-  const datasets = Object.entries(resultData).map(([q, options], i) => ({
-    label: `Fråga ${i + 1}`,
-    data: labels.map(l => options[l] || 0),
-    backgroundColor: `hsl(${i * 30}, 70%, 60%)`
-  }));
+  const resultsContainer = document.getElementById("results-table");
+  resultsContainer.innerHTML = "";
 
-  new Chart(chartCanvas, {
-    type: "bar",
-    data: { labels, datasets },
-    options: {
-      responsive: true,
-      scales: { x: { stacked: true }, y: { stacked: true } }
-    }
+  Object.entries(resultData).forEach(([q, options], qIndex) => {
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    thead.innerHTML = `<tr><th>Fråga ${qIndex + 1}</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>`;
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    Object.entries(options).forEach(([option, value]) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${option}</td>` + [1, 2, 3, 4, 5].map(i => `<td>${value[i] || 0}</td>`).join("");
+      tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+    resultsContainer.appendChild(table);
+    resultsContainer.appendChild(document.createElement("br"));
   });
 };
 
