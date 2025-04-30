@@ -16,11 +16,14 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   max-width: 800px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 h1 {
   text-align: center;
   color: #333;
+  font-size: 24px;
+  margin-bottom: 20px;
 }
 
 #language-toggle {
@@ -44,19 +47,28 @@ h1 {
 }
 
 .option-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  text-align: left;
 }
 
 .radio-group {
   display: flex;
+  justify-content: flex-start;
   gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap; /* Ensures proper wrapping on small screens */
+}
+
+.radio-label {
+  display: flex;
+  flex-direction: column; /* Place radio button below text */
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
 }
 
 .radio-input {
-  margin-right: 5px;
+  margin-bottom: 5px;
 }
 
 .next-btn {
@@ -114,26 +126,28 @@ h1 {
 .result-table th {
   background-color: #f2f2f2;
 }
-.option-container {
-  margin-bottom: 20px;
-  text-align: left;
-}
 
-.radio-group {
-  display: flex;
-  justify-content: flex-start;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.radio-label {
-  display: flex;
-  flex-direction: column; /* Place radio button below text */
-  align-items: center;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.radio-input {
-  margin-bottom: 5px;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .radio-group {
+    justify-content: space-between; /* Adjust for smaller screens */
+    gap: 5px;
+  }
+  
+  .radio-label {
+    font-size: 12px; /* Smaller font size for mobile */
+  }
+  
+  .next-btn, .submit-btn {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+  
+  h1 {
+    font-size: 20px;
+  }
+  
+  #language-select {
+    font-size: 12px;
+  }
 }
