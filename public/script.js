@@ -1,4 +1,4 @@
-const frågor = [
+const questions = [
   "När du ska köpa leksaker, vart vänder du dig först?",
   "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?",
   "Vilken betalningsmetod föredrar du när du handlar leksaker online?",
@@ -13,7 +13,7 @@ const frågor = [
   "Om du skulle välja bort en butik eller e-handel, vad skulle vara främsta anledningen?"
 ];
 
-const alternativ = [
+const options = [
   ["Fysisk leksaksbutik", "Svensk nätbutik", "Åhléns", "Internationell e-handelsplattform", "Varuhus/lågprisbutik"],
   ["Pris", "Leveranstid", "Sortiment/Produktutbud", "Kundservice och rådgivning", "Enkelhet att beställa"],
   ["Klarna", "Kredit-/betalkort", "Swish", "PayPal", "Direkt bankbetalning"],
@@ -28,30 +28,28 @@ const alternativ = [
   ["Höga priser", "Dålig kundservice", "Lång leveranstid", "Dåligt sortiment", "Komplicerad retur"]
 ];
 
-const nextButtonText = "Next";
-const submitButtonText = "Submit";
-const rankSelectionText = "Select rank (1–5)";
-const rankErrorText = "Each rank from 1–5 must be used exactly once.";
-const clickSubmitText = "Click Submit to see results.";
-const downloadText = "Download results as CSV";
+const nextButtonText = "Nästa";
+const submitButtonText = "Skicka";
+const rankSelectionText = "Välj rang (1–5)";
+const rankErrorText = "Varje rang 1–5 måste användas exakt en gång.";
+const clickSubmitText = "Klicka på Skicka för att se resultatet.";
 
 const form = document.getElementById("survey-form");
 const submitBtn = document.getElementById("submit-btn");
-const downloadBtn = document.getElementById("download-btn");
 let userAnswers = {};
 let currentQuestion = 0;
 
-// Show questions
+// Show question
 function showQuestion(index) {
   form.innerHTML = "";
   const questionDiv = document.createElement("div");
   questionDiv.className = "question";
-  questionDiv.innerHTML = `<h3>Fråga ${index + 1}: ${frågor[index]}</h3>`;
+  questionDiv.innerHTML = `<h3>Fråga ${index + 1}: ${questions[index]}</h3>`;
 
   const optionsDiv = document.createElement("div");
   optionsDiv.className = "options";
 
-  alternativ[index].forEach((opt, i) => {
+  options[index].forEach((opt, i) => {
     const select = document.createElement("select");
     select.name = `q${index}-${i}`;
     select.dataset.option = opt;
@@ -65,6 +63,7 @@ function showQuestion(index) {
     defaultOpt.selected = true;
     select.appendChild(defaultOpt);
 
+    // Add rank options (1–5)
     for (let r = 1; r <= 5; r++) {
       const optEl = document.createElement("option");
       optEl.value = r;
@@ -77,6 +76,9 @@ function showQuestion(index) {
     label.appendChild(select);
     optionsDiv.appendChild(label);
     optionsDiv.appendChild(document.createElement("br"));
+
+    // Add change event listener to update dropdowns
+    select.addEventListener("change", () => updateDropdowns(optionsDiv, select));
   });
 
   questionDiv.appendChild(optionsDiv);
@@ -109,7 +111,7 @@ function showQuestion(index) {
 
     userAnswers[`q${index + 1}`] = values;
     currentQuestion++;
-    if (currentQuestion < frågor.length) {
+    if (currentQuestion < questions.length) {
       showQuestion(currentQuestion);
     } else {
       submitBtn.textContent = submitButtonText;
@@ -118,6 +120,23 @@ function showQuestion(index) {
     }
   };
   form.appendChild(nextBtn);
+}
+
+// Update dropdowns to disable selected ranks
+function updateDropdowns(optionsDiv, currentSelect) {
+  const selects = optionsDiv.querySelectorAll("select");
+  const selectedValues = Array.from(selects).map(select => select.value);
+
+  selects.forEach(select => {
+    const currentValue = select.value;
+    Array.from(select.options).forEach(option => {
+      if (option.value && selectedValues.includes(option.value) && option.value !== currentValue) {
+        option.disabled = true;
+      } else {
+        option.disabled = false;
+      }
+    });
+  });
 }
 
 // Submit survey
@@ -162,31 +181,6 @@ submitBtn.onclick = async () => {
     resultsContainer.appendChild(table);
     resultsContainer.appendChild(document.createElement("br"));
   });
-
-  downloadBtn.style.display = "block";
 };
-
-// Handle download button click
-downloadBtn.addEventListener("click", () => {
-  const isAdmin = prompt("Enter admin password") === "Survey-2025";
-  if (isAdmin) {
-    alert("Password correct! You can now download the results.");
-    const csvContent = generateCSVContent(); // Function to generate CSV content
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "survey_results.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } else {
-    alert("Incorrect password! Access denied.");
-  }
-});
-
-// Dummy CSV generation logic (replace with actual logic)
-function generateCSVContent() {
-  return "data:text/csv;charset=utf-8,Fråga,Alternativ 1,Alternativ 2\nExempel Fråga,5,3";
-}
 
 showQuestion(currentQuestion);

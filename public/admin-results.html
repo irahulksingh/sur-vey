@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Results</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Survey Results</h1>
+    <div id="results-container">
+      <!-- Results will be rendered here -->
+    </div>
+  </div>
+
+  <script>
+    // Prompt for admin password
+    const isAdmin = prompt("Enter admin password") === "Survey-2025";
+
+    if (!isAdmin) {
+      alert("Access Denied. Incorrect password.");
+      window.location.href = "index.html"; // Redirect to main page
+    } else {
+      // Fetch and render results
+      fetch("/results")
+        .then((response) => response.json())
+        .then((data) => {
+          const resultsContainer = document.getElementById("results-container");
+          resultsContainer.innerHTML = generateResultsTable(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching results:", error);
+        });
+    }
+
+    // Function to generate results table
+    function generateResultsTable(results) {
+      let html = "<table>";
+      html += `
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Option 1</th>
+            <th>Option 2</th>
+            <th>Option 3</th>
+            <th>Option 4</th>
+            <th>Option 5</th>
+          </tr>
+        </thead>
+        <tbody>
+      `;
+
+      Object.entries(results).forEach(([question, options]) => {
+        html += `
+          <tr>
+            <td>${question}</td>
+            ${[1, 2, 3, 4, 5].map((rank) => `<td>${options[rank] || 0}</td>`).join("")}
+          </tr>
+        `;
+      });
+
+      html += "</tbody></table>";
+      return html;
+    }
+  </script>
+</body>
+</html>
