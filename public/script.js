@@ -30,8 +30,8 @@ const options = [
 
 const nextButtonText = "Nästa";
 const submitButtonText = "Skicka";
-const clickSubmitText = "Klicka på Skicka för att se resultatet.";
 const adminViewText = "Admin View Results";
+const adminPassword = "Survey-2025";
 
 const form = document.getElementById("survey-form");
 const submitBtn = document.getElementById("submit-btn");
@@ -114,7 +114,7 @@ function showQuestion(index) {
     } else {
       submitBtn.textContent = submitButtonText;
       submitBtn.style.display = "block";
-      form.innerHTML = `<p>${clickSubmitText}</p>`;
+      form.innerHTML = `<p>Klicka på Skicka för att slutföra enkäten.</p>`;
     }
   };
   form.appendChild(nextBtn);
@@ -153,7 +153,12 @@ submitBtn.onclick = async () => {
 
   const adminViewBtn = document.getElementById("admin-view-btn");
   adminViewBtn.onclick = () => {
-    window.location.href = "admin-results.html";
+    const isAdmin = prompt("Enter admin password");
+    if (isAdmin === adminPassword) {
+      window.location.href = "admin-results.html";
+    } else {
+      alert("Access Denied. Incorrect password.");
+    }
   };
 };
 
