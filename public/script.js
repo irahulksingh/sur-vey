@@ -135,68 +135,72 @@ function updateDropdowns(optionsDiv, currentSelect) {
 
 // Submit survey
 submitBtn.onclick = async () => {
-  // Send answers to the server
-  const res = await fetch("/submit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(userAnswers)
-  });
+  try {
+    const res = await fetch("/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userAnswers),
+    });
 
-  const data = await res.json();
-  alert(data.message);
+    const data = await res.json();
+    alert(data.message);
 
-  // Show the results table and fetch data dynamically
-  resultsTable.style.display = "block";
-  fetchResults();
+    // Fetch and display results
+    fetchResults();
 
-  // Show admin view button
-  adminViewContainer.style.display = "block";
-
-  adminViewBtn.onclick = () => {
-    const password = prompt("Ange adminlösenord:");
-    if (password === adminPassword) {
-      window.location.href = "admin-results.html";
-    } else {
-      alert("Fel lösenord! Åtkomst nekad.");
-    }
-  };
+    // Show admin button
+    adminViewContainer.style.display = "block";
+    adminViewBtn.onclick = () => {
+      const password = prompt("Ange adminlösenord:");
+      if (password === adminPassword) {
+        window.location.href = "admin-results.html";
+      } else {
+        alert("Fel lösenord! Åtkomst nekad.");
+      }
+    };
+  } catch (error) {
+    console.error("Error submitting survey:", error);
+  }
 };
 
-// Fetch and render results
+// Fetch results and render results table
 async function fetchResults() {
   try {
     const res = await fetch("/results");
-    const resultData = await res.json();
+    const data = await res.json();
 
-    // Clear previous results
-    resultsTable.innerHTML = "";
-
-    let html = "<table>";
-    html += `
-      <thead>
-        <tr>
-          <th>Fråga</th>
-          <th>Alternativ 1</th>
-          <th>Alternativ 2</th>
-          <th>Alternativ 3</th>
-          <th>Alternativ 4</th>
-          <th>Alternativ 5</th>
-        </tr>
-      </thead>
-      <tbody>
+    // Build results table
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Fråga</th>
+            <th>Alternativ 1</th>
+            <th>Alternativ 2</th>
+            <th>Alternativ 3</th>
+            <th>Alternativ 4</th>
+            <th>Alternativ 5</th>
+          </tr>
+        </thead>
+        <tbody>
     `;
 
-    Object.entries(resultData).forEach(([question, options]) => {
+    Object.keys(data).forEach((question) => {
       html += `
         <tr>
           <td>${question}</td>
-          ${[1, 2, 3, 4, 5].map(rank => `<td>${options[rank] || 0}</td>`).join("")}
+          <td>${data[question]["1"] || 0}</td>
+          <td>${data[question]["2"] || 0}</td>
+          <td>${data[question]["3"] || 0}</td>
+          <td>${data[question]["4"] || 0}</td>
+          <td>${data[question]["5"] || 0}</td>
         </tr>
       `;
     });
 
     html += "</tbody></table>";
     resultsTable.innerHTML = html;
+    resultsTable.style.display = "block";
   } catch (error) {
     console.error("Error fetching results:", error);
     resultsTable.innerHTML = "<p>Det gick inte att hämta resultaten.</p>";
