@@ -8,7 +8,15 @@
 </head>
 <body>
   <div class="container">
-    <h1>Enkätundersökning</h1>
+    <!-- Language Toggle -->
+    <div id="language-toggle">
+      <label for="language-select">Language:</label>
+      <select id="language-select">
+        <option value="sv" selected>Swedish</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+    <h1 id="survey-title">Enkätundersökning</h1>
     <form id="survey-form"></form>
     <button id="submit-btn" class="submit-btn" style="display:none;">Skicka</button>
     <div id="results-table"></div> <!-- Results will be shown here -->

@@ -1,35 +1,55 @@
-const frågor = [
-  "När du ska köpa leksaker, vart vänder du dig först?",
-  "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?"
-];
+const questions = {
+  sv: [
+    "När du ska köpa leksaker, vart vänder du dig först?",
+    "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?"
+  ],
+  en: [
+    "When buying toys, where do you go first?",
+    "What factor most influences your choice of store when buying toys?"
+  ]
+};
 
-const alternativ = [
-  ["Fysisk leksaksbutik", "Svensk nätbutik", "Åhléns", "Internationell e-handelsplattform", "Varuhus/lågprisbutik"],
-  ["Pris", "Leveranstid", "Sortiment/Produktutbud", "Kundservice och rådgivning", "Enkelhet att beställa"]
-];
+const options = {
+  sv: [
+    ["Fysisk leksaksbutik", "Svensk nätbutik", "Åhléns", "Internationell e-handelsplattform", "Varuhus/lågprisbutik"],
+    ["Pris", "Leveranstid", "Sortiment/Produktutbud", "Kundservice och rådgivning", "Enkelhet att beställa"]
+  ],
+  en: [
+    ["Physical toy store", "Swedish online store", "Åhléns", "International e-commerce platform", "Department/discount store"],
+    ["Price", "Delivery time", "Selection/Product range", "Customer support and advice", "Ease of ordering"]
+  ]
+};
 
-const nextButtonText = "Nästa"; // Swedish for "Next"
-const submitButtonText = "Skicka"; // Swedish for "Submit"
-const rankErrorText = "Varje alternativ måste ha en unik rang (1–5)."; // Swedish for "Each option must have a unique rank."
-const clickSubmitText = "Klicka på Skicka för att slutföra enkäten."; // Swedish for "Click Submit to complete the survey."
+let currentLanguage = "sv";
+let userAnswers = {};
+let currentQuestion = 0;
 
 const form = document.getElementById("survey-form");
 const submitBtn = document.getElementById("submit-btn");
-const resultsContainer = document.getElementById("results-table"); // Div for displaying results
-let userAnswers = {};
-let currentQuestion = 0;
+const resultsContainer = document.getElementById("results-table");
+const languageSelect = document.getElementById("language-select");
+const surveyTitle = document.getElementById("survey-title");
+
+// Update the survey language
+languageSelect.addEventListener("change", () => {
+  currentLanguage = languageSelect.value;
+  surveyTitle.textContent = currentLanguage === "sv" ? "Enkätundersökning" : "Survey";
+  currentQuestion = 0;
+  userAnswers = {};
+  showQuestion(currentQuestion);
+});
 
 // Show questions with radio buttons for each rank
 function showQuestion(index) {
   form.innerHTML = "";
   const questionDiv = document.createElement("div");
   questionDiv.className = "question";
-  questionDiv.innerHTML = `<h3>Fråga ${index + 1}: ${frågor[index]}</h3>`;
+  questionDiv.innerHTML = `<h3>${questions[currentLanguage][index]}</h3>`;
 
   const optionsDiv = document.createElement("div");
   optionsDiv.className = "options";
 
-  alternativ[index].forEach((opt, optIndex) => {
+  options[currentLanguage][index].forEach((opt, optIndex) => {
     const optionContainer = document.createElement("div");
     optionContainer.className = "option-container";
 
@@ -37,14 +57,13 @@ function showQuestion(index) {
     label.textContent = opt;
     label.className = "option-label";
 
-    // Add radio buttons for ranks 1–5
     const radioGroup = document.createElement("div");
     radioGroup.className = "radio-group";
 
     for (let rank = 1; rank <= 5; rank++) {
       const radio = document.createElement("input");
       radio.type = "radio";
-      radio.name = `option-${index}-${optIndex}`; // Unique to the question and option
+      radio.name = `rank-${index}-${optIndex}`;
       radio.value = rank;
       radio.dataset.option = opt;
       radio.dataset.rank = rank;
@@ -57,8 +76,7 @@ function showQuestion(index) {
 
       radioGroup.appendChild(radioLabel);
 
-      // Add event listener to prevent duplicate ranks
-      radio.addEventListener("change", () => updateRanks(optionsDiv, rank, index));
+      radio.addEventListener("change", () => updateRanks(optionsDiv, rank));
     }
 
     optionContainer.appendChild(label);
@@ -70,15 +88,13 @@ function showQuestion(index) {
   form.appendChild(questionDiv);
 
   const nextBtn = document.createElement("button");
-  nextBtn.textContent = nextButtonText;
+  nextBtn.textContent = currentLanguage === "sv" ? "Nästa" : "Next";
   nextBtn.type = "button";
   nextBtn.className = "next-btn";
   nextBtn.onclick = () => {
     const selectedRanks = Array.from(optionsDiv.querySelectorAll("input:checked"));
-    const usedRanks = new Set(selectedRanks.map(radio => radio.value));
-
-    if (usedRanks.size !== alternativ[index].length) {
-      alert(rankErrorText);
+    if (selectedRanks.length !== options[currentLanguage][index].length) {
+      alert(currentLanguage === "sv" ? "Varje alternativ måste ha en unik rang (1–5)." : "Each option must have a unique rank (1–5).");
       return;
     }
 
@@ -89,37 +105,32 @@ function showQuestion(index) {
 
     userAnswers[`q${index + 1}`] = answers;
     currentQuestion++;
-    if (currentQuestion < frågor.length) {
+    if (currentQuestion < questions[currentLanguage].length) {
       showQuestion(currentQuestion);
     } else {
-      submitBtn.textContent = submitButtonText;
+      submitBtn.textContent = currentLanguage === "sv" ? "Skicka" : "Submit";
       submitBtn.style.display = "block";
-      form.innerHTML = `<p>${clickSubmitText}</p>`;
+      form.innerHTML = `<p>${currentLanguage === "sv" ? "Klicka på Skicka för att slutföra enkäten." : "Click Submit to complete the survey."}</p>`;
     }
   };
   form.appendChild(nextBtn);
 }
 
-// Prevent duplicate ranks within the same question
-function updateRanks(optionsDiv, selectedRank, currentQuestionIndex) {
+// Prevent duplicate ranks
+function updateRanks(optionsDiv, selectedRank) {
   const allRadios = optionsDiv.querySelectorAll("input");
   allRadios.forEach(radio => {
     if (radio.value === selectedRank.toString() && !radio.checked) {
       radio.disabled = true;
-    } else if (!isRankSelected(currentQuestionIndex, radio.value)) {
+    } else {
       radio.disabled = false;
     }
   });
 }
 
-// Check if a rank is already selected in the current question
-function isRankSelected(questionIndex, rank) {
-  const radios = document.querySelectorAll(`input[name^="option-${questionIndex}"]`);
-  return Array.from(radios).some(radio => radio.checked && radio.value === rank);
-}
-
 // Submit survey
 submitBtn.onclick = async () => {
+  submitBtn.disabled = true; // Disable the button after submission
   const res = await fetch("/submit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -129,7 +140,7 @@ submitBtn.onclick = async () => {
   const data = await res.json();
   alert(data.message);
 
-  // Fetch and display the results
+  // Fetch and display results
   await fetchResults();
 };
 
@@ -138,17 +149,16 @@ async function fetchResults() {
   const response = await fetch("/results");
   const resultData = await response.json();
 
-  resultsContainer.innerHTML = ""; // Clear previous results
+  resultsContainer.innerHTML = "";
 
   const table = document.createElement("table");
   table.className = "result-table";
 
-  // Create table header
   const thead = document.createElement("thead");
   thead.innerHTML = `
     <tr>
-      <th>Fråga</th>
-      <th>Alternativ</th>
+      <th>${currentLanguage === "sv" ? "Fråga" : "Question"}</th>
+      <th>${currentLanguage === "sv" ? "Alternativ" : "Option"}</th>
       <th>Rank 1</th>
       <th>Rank 2</th>
       <th>Rank 3</th>
@@ -158,7 +168,6 @@ async function fetchResults() {
   `;
   table.appendChild(thead);
 
-  // Create table body
   const tbody = document.createElement("tbody");
   Object.entries(resultData).forEach(([question, options]) => {
     Object.entries(options).forEach(([option, ranks]) => {
@@ -175,5 +184,6 @@ async function fetchResults() {
   table.appendChild(tbody);
   resultsContainer.appendChild(table);
 }
+
 // Initialize the first question
 showQuestion(currentQuestion);
