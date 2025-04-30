@@ -34,6 +34,7 @@ const form = document.getElementById("survey-form");
 const submitBtn = document.getElementById("submit-btn");
 const adminViewContainer = document.getElementById("admin-view-container");
 const adminViewBtn = document.getElementById("admin-view-btn");
+const resultsTable = document.getElementById("results-table");
 let userAnswers = {};
 let currentQuestion = 0;
 
@@ -133,8 +134,22 @@ function updateDropdowns(optionsDiv, currentSelect) {
 }
 
 // Submit survey
-submitBtn.onclick = () => {
-  submitBtn.style.display = "none";
+submitBtn.onclick = async () => {
+  // Send answers to the server
+  const res = await fetch("/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(userAnswers)
+  });
+
+  const data = await res.json();
+  alert(data.message);
+
+  // Show the results table and fetch data dynamically
+  resultsTable.style.display = "block";
+  fetchResults();
+
+  // Show admin view button
   adminViewContainer.style.display = "block";
 
   adminViewBtn.onclick = () => {
@@ -146,6 +161,47 @@ submitBtn.onclick = () => {
     }
   };
 };
+
+// Fetch and render results
+async function fetchResults() {
+  try {
+    const res = await fetch("/results");
+    const resultData = await res.json();
+
+    // Clear previous results
+    resultsTable.innerHTML = "";
+
+    let html = "<table>";
+    html += `
+      <thead>
+        <tr>
+          <th>Fråga</th>
+          <th>Alternativ 1</th>
+          <th>Alternativ 2</th>
+          <th>Alternativ 3</th>
+          <th>Alternativ 4</th>
+          <th>Alternativ 5</th>
+        </tr>
+      </thead>
+      <tbody>
+    `;
+
+    Object.entries(resultData).forEach(([question, options]) => {
+      html += `
+        <tr>
+          <td>${question}</td>
+          ${[1, 2, 3, 4, 5].map(rank => `<td>${options[rank] || 0}</td>`).join("")}
+        </tr>
+      `;
+    });
+
+    html += "</tbody></table>";
+    resultsTable.innerHTML = html;
+  } catch (error) {
+    console.error("Error fetching results:", error);
+    resultsTable.innerHTML = "<p>Det gick inte att hämta resultaten.</p>";
+  }
+}
 
 // Initialize the first question
 showQuestion(currentQuestion);
