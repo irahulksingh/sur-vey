@@ -10,7 +10,7 @@ const alternativ = [
 
 const nextButtonText = "Nästa"; // Swedish for "Next"
 const submitButtonText = "Skicka"; // Swedish for "Submit"
-const rankErrorText = "Varje alternativ måste ha exakt en rang (1–5)."; // Swedish for "Each option must have exactly one rank."
+const rankErrorText = "Varje alternativ måste ha en unik rang (1–5)."; // Swedish for "Each option must have a unique rank."
 const clickSubmitText = "Klicka på Skicka för att slutföra enkäten."; // Swedish for "Click Submit to complete the survey."
 
 const form = document.getElementById("survey-form");
@@ -44,7 +44,7 @@ function showQuestion(index) {
     for (let rank = 1; rank <= 5; rank++) {
       const radio = document.createElement("input");
       radio.type = "radio";
-      radio.name = `option-${optIndex}`; // Grouped by option
+      radio.name = `option-${index}-${optIndex}`; // Unique to the question and option
       radio.value = rank;
       radio.dataset.option = opt;
       radio.dataset.rank = rank;
@@ -56,6 +56,9 @@ function showQuestion(index) {
       radioLabel.appendChild(radio);
 
       radioGroup.appendChild(radioLabel);
+
+      // Add event listener to prevent duplicate ranks
+      radio.addEventListener("change", () => updateRanks(optionsDiv, rank, index));
     }
 
     optionContainer.appendChild(label);
@@ -72,7 +75,9 @@ function showQuestion(index) {
   nextBtn.className = "next-btn";
   nextBtn.onclick = () => {
     const selectedRanks = Array.from(optionsDiv.querySelectorAll("input:checked"));
-    if (selectedRanks.length !== alternativ[index].length) {
+    const usedRanks = new Set(selectedRanks.map(radio => radio.value));
+
+    if (usedRanks.size !== alternativ[index].length) {
       alert(rankErrorText);
       return;
     }
@@ -93,6 +98,24 @@ function showQuestion(index) {
     }
   };
   form.appendChild(nextBtn);
+}
+
+// Prevent duplicate ranks within the same question
+function updateRanks(optionsDiv, selectedRank, currentQuestionIndex) {
+  const allRadios = optionsDiv.querySelectorAll("input");
+  allRadios.forEach(radio => {
+    if (radio.value === selectedRank.toString() && !radio.checked) {
+      radio.disabled = true;
+    } else if (!isRankSelected(currentQuestionIndex, radio.value)) {
+      radio.disabled = false;
+    }
+  });
+}
+
+// Check if a rank is already selected in the current question
+function isRankSelected(questionIndex, rank) {
+  const radios = document.querySelectorAll(`input[name^="option-${questionIndex}"]`);
+  return Array.from(radios).some(radio => radio.checked && radio.value === rank);
 }
 
 // Submit survey
@@ -122,11 +145,13 @@ async function fetchResults() {
 
   // Create table header
   const thead = document.createElement("thead");
-  thead.innerHTML = `<tr>
-    <th>Fråga</th>
-    <th>Alternativ</th>
-    <th>Rank</th>
-  </tr>`;
+  thead.innerHTML = `
+    <tr>
+      <th>Fråga</th>
+      <th>Alternativ</th>
+      <th>Rank</th>
+    </tr>
+  `;
   table.appendChild(thead);
 
   // Create table body
