@@ -13,21 +13,6 @@ const questions = [
   "Om du skulle välja bort en butik eller e-handel, vad skulle vara främsta anledningen?"
 ];
 
-const options = [
-  ["Fysisk leksaksbutik", "Svensk nätbutik", "Åhléns", "Internationell e-handelsplattform", "Varuhus/lågprisbutik"],
-  ["Pris", "Leveranstid", "Sortiment/Produktutbud", "Kundservice och rådgivning", "Enkelhet att beställa"],
-  ["Klarna", "Kredit-/betalkort", "Swish", "PayPal", "Direkt bankbetalning"],
-  ["Snabb leverans", "Fri frakt", "Enkel returhantering", "Kundsupportens tillgänglighet", "Produktens kvalitet"],
-  ["Facebook", "Instagram", "TikTok", "YouTube", "Inget socialt media påverkar mig"],
-  ["Lägre priser", "Snabbare leveranser", "Större sortiment", "Fler kampanjer", "Mer hållbara produkter"],
-  ["Viktigast av allt", "Mycket viktigt", "Ganska viktigt", "Mindre viktigt", "Oviktigt"],
-  ["Rekommendationer", "Sociala medier", "Reklam", "Besök i butik", "Söka online"],
-  ["0–2 år", "3–5 år", "6–9 år", "10–12 år", "Över 12 år"],
-  ["Trendig", "Unik", "Pedagogisk", "Hållbar", "Prisvärd"],
-  ["Traditionella leksaker", "Elektroniska leksaker", "Pyssel", "Utomhusleksaker", "Samlarprodukter"],
-  ["Höga priser", "Dålig kundservice", "Lång leveranstid", "Dåligt sortiment", "Komplicerad retur"]
-];
-
 const adminPassword = "Survey-2025"; // Admin password
 
 const form = document.getElementById("survey-form");
@@ -38,7 +23,7 @@ const resultsTable = document.getElementById("results-table");
 let userAnswers = {};
 let currentQuestion = 0;
 
-// Show questions
+// Show a question
 function showQuestion(index) {
   form.innerHTML = ""; // Clear form for new question
   const questionDiv = document.createElement("div");
@@ -48,69 +33,59 @@ function showQuestion(index) {
   const optionsDiv = document.createElement("div");
   optionsDiv.className = "options";
 
-  options[index].forEach((opt, i) => {
-    const select = document.createElement("select");
-    select.name = `q${index}-${i}`;
-    select.dataset.option = opt;
-    select.required = true;
-
-    const defaultOpt = document.createElement("option");
-    defaultOpt.value = "";
-    defaultOpt.textContent = "Välj rang (1–5)";
-    defaultOpt.disabled = true;
-    defaultOpt.selected = true;
-    select.appendChild(defaultOpt);
-
-    for (let r = 1; r <= 5; r++) {
-      const rankOption = document.createElement("option");
-      rankOption.value = r;
-      rankOption.textContent = r;
-      select.appendChild(rankOption);
-    }
+  for (let i = 1; i <= 5; i++) {
+    const option = document.createElement("div");
+    option.className = "option";
 
     const label = document.createElement("label");
-    label.textContent = opt;
-    label.appendChild(select);
-    optionsDiv.appendChild(label);
+    label.innerHTML = questions[index];
+    option.appendChild(label);
+
+    const select = document.createElement("select");
+    select.name = `q${index}-${i}`;
+    select.required = true;
+    select.innerHTML = `
+      <option value="" disabled selected>Välj rang (1–5)</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    `;
+    option.appendChild(select);
+
+    optionsDiv.appendChild(option);
 
     // Add change event listener to update dropdowns
     select.addEventListener("change", () => updateDropdowns(optionsDiv, select));
-  });
+  }
 
   questionDiv.appendChild(optionsDiv);
   form.appendChild(questionDiv);
 
   const nextBtn = document.createElement("button");
-  nextBtn.textContent = "Nästa";
   nextBtn.type = "button";
   nextBtn.className = "next-btn";
+  nextBtn.textContent = "Nästa";
   nextBtn.onclick = () => {
-    const selects = form.querySelectorAll("select");
+    const selects = document.querySelectorAll(`select[name^="q${index}"]`);
     const answers = {};
-    const usedRanks = new Set();
-    let valid = true;
-
-    selects.forEach(select => {
-      if (!select.value || usedRanks.has(select.value)) {
-        valid = false;
-      } else {
-        usedRanks.add(select.value);
-        answers[select.dataset.option] = parseInt(select.value);
+    selects.forEach((select) => {
+      if (select.value) {
+        answers[select.name] = select.value;
       }
     });
 
-    if (!valid || usedRanks.size !== 5) {
-      alert("Varje rang 1–5 måste användas exakt en gång.");
+    if (Object.keys(answers).length !== 5) {
+      alert("Du måste rangordna alla alternativ.");
       return;
     }
 
     userAnswers[`q${index + 1}`] = answers;
-    currentQuestion++;
-    if (currentQuestion < questions.length) {
-      showQuestion(currentQuestion);
+    if (index < questions.length - 1) {
+      showQuestion(index + 1);
     } else {
       submitBtn.style.display = "block";
-      form.innerHTML = `<p>Klicka på "Skicka" för att slutföra enkäten.</p>`;
     }
   };
   form.appendChild(nextBtn);
@@ -135,6 +110,7 @@ function updateDropdowns(optionsDiv, currentSelect) {
 
 // Submit survey
 submitBtn.onclick = async () => {
+  console.log("Submitting survey:", userAnswers);
   try {
     const res = await fetch("/submit", {
       method: "POST",
@@ -143,6 +119,7 @@ submitBtn.onclick = async () => {
     });
 
     const data = await res.json();
+    console.log("Submit response:", data);
     alert(data.message);
 
     // Fetch and display results
@@ -155,7 +132,7 @@ submitBtn.onclick = async () => {
       if (password === adminPassword) {
         window.location.href = "admin-results.html";
       } else {
-        alert("Fel lösenord! Åtkomst nekad.");
+        alert("Fel lösenord. Åtkomst nekad.");
       }
     };
   } catch (error) {
@@ -165,9 +142,11 @@ submitBtn.onclick = async () => {
 
 // Fetch results and render results table
 async function fetchResults() {
+  console.log("Fetching results...");
   try {
     const res = await fetch("/results");
     const data = await res.json();
+    console.log("Results data:", data);
 
     // Build results table
     let html = `
