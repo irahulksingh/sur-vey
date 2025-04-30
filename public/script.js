@@ -1,16 +1,16 @@
 const frågor = [
   "När du ska köpa leksaker, vart vänder du dig först?",
-  "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?",
+  "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?"
 ];
 
 const alternativ = [
   ["Fysisk leksaksbutik", "Svensk nätbutik", "Åhléns", "Internationell e-handelsplattform", "Varuhus/lågprisbutik"],
-  ["Pris", "Leveranstid", "Sortiment/Produktutbud", "Kundservice och rådgivning", "Enkelhet att beställa"],
+  ["Pris", "Leveranstid", "Sortiment/Produktutbud", "Kundservice och rådgivning", "Enkelhet att beställa"]
 ];
 
 const nextButtonText = "Nästa"; // Swedish for "Next"
 const submitButtonText = "Skicka"; // Swedish for "Submit"
-const rankErrorText = "Varje rang från 1 till 5 måste användas exakt en gång."; // Swedish for "Each rank from 1–5 must be used exactly once."
+const rankErrorText = "Varje alternativ måste ha exakt en rang (1–5)."; // Swedish for "Each option must have exactly one rank."
 const clickSubmitText = "Klicka på Skicka för att slutföra enkäten."; // Swedish for "Click Submit to complete the survey."
 
 const form = document.getElementById("survey-form");
@@ -44,7 +44,7 @@ function showQuestion(index) {
     for (let rank = 1; rank <= 5; rank++) {
       const radio = document.createElement("input");
       radio.type = "radio";
-      radio.name = `rank-${index}-${rank}`; // Unique to the question and rank
+      radio.name = `option-${optIndex}`; // Grouped by option
       radio.value = rank;
       radio.dataset.option = opt;
       radio.dataset.rank = rank;
@@ -56,9 +56,6 @@ function showQuestion(index) {
       radioLabel.appendChild(radio);
 
       radioGroup.appendChild(radioLabel);
-
-      // Add event listener to prevent duplicate ranks
-      radio.addEventListener("change", () => updateRadioGroups(optionsDiv, rank));
     }
 
     optionContainer.appendChild(label);
@@ -75,9 +72,7 @@ function showQuestion(index) {
   nextBtn.className = "next-btn";
   nextBtn.onclick = () => {
     const selectedRanks = Array.from(optionsDiv.querySelectorAll("input:checked"));
-    const usedRanks = new Set(selectedRanks.map(radio => radio.dataset.rank));
-
-    if (usedRanks.size !== 5 || selectedRanks.length !== 5) {
+    if (selectedRanks.length !== alternativ[index].length) {
       alert(rankErrorText);
       return;
     }
@@ -98,18 +93,6 @@ function showQuestion(index) {
     }
   };
   form.appendChild(nextBtn);
-}
-
-// Prevent duplicate ranks in the same question
-function updateRadioGroups(optionsDiv, selectedRank) {
-  const allRadios = optionsDiv.querySelectorAll("input");
-  allRadios.forEach(radio => {
-    if (radio.dataset.rank === selectedRank.toString() && !radio.checked) {
-      radio.disabled = true;
-    } else {
-      radio.disabled = false;
-    }
-  });
 }
 
 // Submit survey
@@ -142,23 +125,19 @@ async function fetchResults() {
   thead.innerHTML = `<tr>
     <th>Fråga</th>
     <th>Alternativ</th>
-    <th>Rank 1</th>
-    <th>Rank 2</th>
-    <th>Rank 3</th>
-    <th>Rank 4</th>
-    <th>Rank 5</th>
+    <th>Rank</th>
   </tr>`;
   table.appendChild(thead);
 
   // Create table body
   const tbody = document.createElement("tbody");
   Object.entries(resultData).forEach(([question, options]) => {
-    Object.entries(options).forEach(([option, rankings]) => {
+    Object.entries(options).forEach(([option, rank]) => {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${question}</td>
         <td>${option}</td>
-        ${Array.from({ length: 5 }, (_, i) => `<td>${rankings[i + 1] || 0}</td>`).join("")}
+        <td>${rank}</td>
       `;
       tbody.appendChild(row);
     });

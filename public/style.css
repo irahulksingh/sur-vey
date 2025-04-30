@@ -32,13 +32,15 @@ h1 {
 }
 
 .option-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 15px;
 }
 
 .radio-group {
   display: flex;
   gap: 10px;
-  margin-top: 5px;
 }
 
 .radio-input {
@@ -90,7 +92,6 @@ h1 {
   border: 1px solid #ccc;
   padding: 10px;
   text-align: center;
-  width: calc(100% / 6); /* Equal column widths */
 }
 
 .result-table th {
