@@ -1,31 +1,11 @@
 const frågor = [
   "När du ska köpa leksaker, vart vänder du dig först?",
   "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?",
-  "Vilken betalningsmetod föredrar du när du handlar leksaker online?",
-  "Vilket alternativ påverkar mest ditt beslut att köpa leksaker online?",
-  "Vilka sociala medier påverkar mest ditt beslut att köpa leksaker?",
-  "Vad skulle få dig att handla oftare från Åhléns?",
-  "Hur viktig är hållbarhet när du väljer leksaker?",
-  "Hur upptäcker du oftast nya leksaksprodukter?",
-  "Vilken åldersgrupp handlar du främst leksaker till?",
-  "Vad är viktigast vid köp av presenter (leksaker)?",
-  "Vilken typ av leksaker köper du oftast?",
-  "Om du skulle välja bort en butik eller e-handel, vad skulle vara främsta anledningen?"
 ];
 
 const alternativ = [
   ["Fysisk leksaksbutik", "Svensk nätbutik", "Åhléns", "Internationell e-handelsplattform", "Varuhus/lågprisbutik"],
   ["Pris", "Leveranstid", "Sortiment/Produktutbud", "Kundservice och rådgivning", "Enkelhet att beställa"],
-  ["Klarna", "Kredit-/betalkort", "Swish", "PayPal", "Direkt bankbetalning"],
-  ["Snabb leverans", "Fri frakt", "Enkel returhantering", "Kundsupportens tillgänglighet", "Produktens kvalitet"],
-  ["Facebook", "Instagram", "TikTok", "YouTube", "Inget socialt media påverkar mig"],
-  ["Lägre priser", "Snabbare leveranser", "Större sortiment", "Fler kampanjer", "Mer hållbara produkter"],
-  ["Viktigast av allt", "Mycket viktigt", "Ganska viktigt", "Mindre viktigt", "Oviktigt"],
-  ["Rekommendationer", "Sociala medier", "Reklam", "Besök i butik", "Söka online"],
-  ["0–2 år", "3–5 år", "6–9 år", "10–12 år", "Över 12 år"],
-  ["Trendig", "Unik", "Pedagogisk", "Hållbar", "Prisvärd"],
-  ["Traditionella leksaker", "Elektroniska leksaker", "Pyssel", "Utomhusleksaker", "Samlarprodukter"],
-  ["Höga priser", "Dålig kundservice", "Lång leveranstid", "Dåligt sortiment", "Komplicerad retur"]
 ];
 
 const nextButtonText = "Nästa"; // Swedish for "Next"
@@ -161,17 +141,27 @@ async function fetchResults() {
   const thead = document.createElement("thead");
   thead.innerHTML = `<tr>
     <th>Fråga</th>
-    ${alternativ[0].map((_, i) => `<th>Alternativ ${i + 1}</th>`).join("")}
+    <th>Alternativ</th>
+    <th>Rank 1</th>
+    <th>Rank 2</th>
+    <th>Rank 3</th>
+    <th>Rank 4</th>
+    <th>Rank 5</th>
   </tr>`;
   table.appendChild(thead);
 
   // Create table body
   const tbody = document.createElement("tbody");
-  Object.entries(resultData).forEach(([question, options], qIndex) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>Fråga ${qIndex + 1}</td>` +
-      Array.from({ length: 5 }, (_, i) => `<td>${options[i + 1] || 0}</td>`).join("");
-    tbody.appendChild(row);
+  Object.entries(resultData).forEach(([question, options]) => {
+    Object.entries(options).forEach(([option, rankings]) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${question}</td>
+        <td>${option}</td>
+        ${Array.from({ length: 5 }, (_, i) => `<td>${rankings[i + 1] || 0}</td>`).join("")}
+      `;
+      tbody.appendChild(row);
+    });
   });
 
   table.appendChild(tbody);

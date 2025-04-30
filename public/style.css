@@ -90,7 +90,7 @@ h1 {
   border: 1px solid #ccc;
   padding: 10px;
   text-align: center;
-  width: calc(100% / 6); /* Equal column widths including question column */
+  width: calc(100% / 6); /* Equal column widths */
 }
 
 .result-table th {
