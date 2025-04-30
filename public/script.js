@@ -76,6 +76,7 @@ function showQuestion(index) {
 
       radioGroup.appendChild(radioLabel);
 
+      // Add event listener to prevent duplicate ranks
       radio.addEventListener("change", () => updateRanks(optionsDiv, rank));
     }
 
@@ -91,13 +92,21 @@ function showQuestion(index) {
   nextBtn.textContent = currentLanguage === "sv" ? "Nästa" : "Next";
   nextBtn.type = "button";
   nextBtn.className = "next-btn";
+
+  // On clicking "Next"
   nextBtn.onclick = () => {
+    // Validate if each option has a selected rank
     const selectedRanks = Array.from(optionsDiv.querySelectorAll("input:checked"));
     if (selectedRanks.length !== options[currentLanguage][index].length) {
-      alert(currentLanguage === "sv" ? "Varje alternativ måste ha en unik rang (1–5)." : "Each option must have a unique rank (1–5).");
+      alert(
+        currentLanguage === "sv"
+          ? "Du måste rangordna alla alternativ innan du går vidare."
+          : "You must rank all options before proceeding to the next question."
+      );
       return;
     }
 
+    // Collect answers for the current question
     const answers = {};
     selectedRanks.forEach(radio => {
       answers[radio.dataset.option] = parseInt(radio.value);
@@ -105,14 +114,21 @@ function showQuestion(index) {
 
     userAnswers[`q${index + 1}`] = answers;
     currentQuestion++;
+
+    // Show the next question or submit the form
     if (currentQuestion < questions[currentLanguage].length) {
       showQuestion(currentQuestion);
     } else {
       submitBtn.textContent = currentLanguage === "sv" ? "Skicka" : "Submit";
       submitBtn.style.display = "block";
-      form.innerHTML = `<p>${currentLanguage === "sv" ? "Klicka på Skicka för att slutföra enkäten." : "Click Submit to complete the survey."}</p>`;
+      form.innerHTML = `<p>${
+        currentLanguage === "sv"
+          ? "Klicka på Skicka för att slutföra enkäten."
+          : "Click Submit to complete the survey."
+      }</p>`;
     }
   };
+
   form.appendChild(nextBtn);
 }
 
