@@ -30,7 +30,6 @@ const alternativ = [
 
 const nextButtonText = "Nästa"; // Swedish for "Next"
 const submitButtonText = "Skicka"; // Swedish for "Submit"
-const rankSelectionText = "Välj rang (1–5)"; // Swedish for "Select rank"
 const rankErrorText = "Varje rang från 1 till 5 måste användas exakt en gång."; // Swedish for "Each rank from 1–5 must be used exactly once."
 const clickSubmitText = "Klicka på Skicka för att slutföra enkäten."; // Swedish for "Click Submit to complete the survey."
 
@@ -40,7 +39,7 @@ const resultsContainer = document.getElementById("results-table"); // Div for di
 let userAnswers = {};
 let currentQuestion = 0;
 
-// Show questions
+// Show questions with radio buttons
 function showQuestion(index) {
   form.innerHTML = "";
   const questionDiv = document.createElement("div");
@@ -51,29 +50,17 @@ function showQuestion(index) {
   optionsDiv.className = "options";
 
   alternativ[index].forEach((opt, i) => {
-    const select = document.createElement("select");
-    select.name = `q${index}-${i}`;
-    select.dataset.option = opt;
-    select.required = true;
-    select.className = "mobile-dropdown";
-
-    const defaultOpt = document.createElement("option");
-    defaultOpt.value = "";
-    defaultOpt.textContent = rankSelectionText;
-    defaultOpt.disabled = true;
-    defaultOpt.selected = true;
-    select.appendChild(defaultOpt);
-
-    for (let r = 1; r <= 5; r++) {
-      const optEl = document.createElement("option");
-      optEl.value = r;
-      optEl.textContent = r;
-      select.appendChild(optEl);
-    }
-
     const label = document.createElement("label");
-    label.textContent = opt;
-    label.appendChild(select);
+    label.className = "radio-label";
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = `q${index}`;
+    radio.value = i + 1;
+    radio.className = "radio-input";
+
+    label.appendChild(radio);
+    label.appendChild(document.createTextNode(opt));
     optionsDiv.appendChild(label);
     optionsDiv.appendChild(document.createElement("br"));
   });
@@ -86,27 +73,13 @@ function showQuestion(index) {
   nextBtn.type = "button";
   nextBtn.className = "next-btn";
   nextBtn.onclick = () => {
-    const selects = form.querySelectorAll("select");
-    const values = {};
-    const usedRanks = new Set();
-    let valid = true;
-
-    selects.forEach(select => {
-      const val = select.value;
-      if (!val || usedRanks.has(val)) {
-        valid = false;
-      } else {
-        usedRanks.add(val);
-        values[select.dataset.option] = parseInt(val);
-      }
-    });
-
-    if (!valid || usedRanks.size !== 5) {
+    const selectedOption = form.querySelector(`input[name="q${index}"]:checked`);
+    if (!selectedOption) {
       alert(rankErrorText);
       return;
     }
 
-    userAnswers[`q${index + 1}`] = values;
+    userAnswers[`q${index + 1}`] = selectedOption.value;
     currentQuestion++;
     if (currentQuestion < frågor.length) {
       showQuestion(currentQuestion);
@@ -141,36 +114,28 @@ async function fetchResults() {
 
   resultsContainer.innerHTML = ""; // Clear previous results
 
-  Object.entries(resultData).forEach(([q, options], qIndex) => {
-    const table = document.createElement("table");
-    table.className = "result-table";
+  const table = document.createElement("table");
+  table.className = "result-table";
 
-    const thead = document.createElement("thead");
-    thead.innerHTML = `<tr>
-      <th>Fråga ${qIndex + 1}</th>
-      <th>1</th>
-      <th>2</th>
-      <th>3</th>
-      <th>4</th>
-      <th>5</th>
-    </tr>`;
-    table.appendChild(thead);
+  // Create table header
+  const thead = document.createElement("thead");
+  thead.innerHTML = `<tr>
+    <th>Fråga</th>
+    ${alternativ[0].map((_, i) => `<th>Alternativ ${i + 1}</th>`).join("")}
+  </tr>`;
+  table.appendChild(thead);
 
-    const tbody = document.createElement("tbody");
-    Object.entries(options).forEach(([option, value]) => {
-      const row = document.createElement("tr");
-      const rowData = [option];
-      for (let i = 1; i <= 5; i++) {
-        rowData.push(value[i] || 0);
-      }
-      row.innerHTML = `<td>${option}</td>` + rowData.slice(1).map(v => `<td>${v}</td>`).join("");
-      tbody.appendChild(row);
-    });
-
-    table.appendChild(tbody);
-    resultsContainer.appendChild(table);
-    resultsContainer.appendChild(document.createElement("br"));
+  // Create table body
+  const tbody = document.createElement("tbody");
+  Object.entries(resultData).forEach(([question, options], qIndex) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>Fråga ${qIndex + 1}</td>` +
+      Array.from({ length: 5 }, (_, i) => `<td>${options[i + 1] || 0}</td>`).join("");
+    tbody.appendChild(row);
   });
+
+  table.appendChild(tbody);
+  resultsContainer.appendChild(table);
 }
 
 // Initialize the first question
