@@ -39,7 +39,7 @@ const resultsContainer = document.getElementById("results-table"); // Div for di
 let userAnswers = {};
 let currentQuestion = 0;
 
-// Show questions with radio buttons
+// Show questions with radio buttons for each rank
 function showQuestion(index) {
   form.innerHTML = "";
   const questionDiv = document.createElement("div");
@@ -49,20 +49,41 @@ function showQuestion(index) {
   const optionsDiv = document.createElement("div");
   optionsDiv.className = "options";
 
-  alternativ[index].forEach((opt, i) => {
+  alternativ[index].forEach((opt, optIndex) => {
+    const optionContainer = document.createElement("div");
+    optionContainer.className = "option-container";
+
     const label = document.createElement("label");
-    label.className = "radio-label";
+    label.textContent = opt;
+    label.className = "option-label";
 
-    const radio = document.createElement("input");
-    radio.type = "radio";
-    radio.name = `q${index}`;
-    radio.value = i + 1;
-    radio.className = "radio-input";
+    // Add radio buttons for ranks 1–5
+    const radioGroup = document.createElement("div");
+    radioGroup.className = "radio-group";
 
-    label.appendChild(radio);
-    label.appendChild(document.createTextNode(opt));
-    optionsDiv.appendChild(label);
-    optionsDiv.appendChild(document.createElement("br"));
+    for (let rank = 1; rank <= 5; rank++) {
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = `rank-${index}-${rank}`; // Unique to the question and rank
+      radio.value = rank;
+      radio.dataset.option = opt;
+      radio.dataset.rank = rank;
+      radio.className = "radio-input";
+
+      const radioLabel = document.createElement("label");
+      radioLabel.className = "radio-label";
+      radioLabel.textContent = rank;
+      radioLabel.appendChild(radio);
+
+      radioGroup.appendChild(radioLabel);
+
+      // Add event listener to prevent duplicate ranks
+      radio.addEventListener("change", () => updateRadioGroups(optionsDiv, rank));
+    }
+
+    optionContainer.appendChild(label);
+    optionContainer.appendChild(radioGroup);
+    optionsDiv.appendChild(optionContainer);
   });
 
   questionDiv.appendChild(optionsDiv);
@@ -73,13 +94,20 @@ function showQuestion(index) {
   nextBtn.type = "button";
   nextBtn.className = "next-btn";
   nextBtn.onclick = () => {
-    const selectedOption = form.querySelector(`input[name="q${index}"]:checked`);
-    if (!selectedOption) {
+    const selectedRanks = Array.from(optionsDiv.querySelectorAll("input:checked"));
+    const usedRanks = new Set(selectedRanks.map(radio => radio.dataset.rank));
+
+    if (usedRanks.size !== 5 || selectedRanks.length !== 5) {
       alert(rankErrorText);
       return;
     }
 
-    userAnswers[`q${index + 1}`] = selectedOption.value;
+    const answers = {};
+    selectedRanks.forEach(radio => {
+      answers[radio.dataset.option] = parseInt(radio.value);
+    });
+
+    userAnswers[`q${index + 1}`] = answers;
     currentQuestion++;
     if (currentQuestion < frågor.length) {
       showQuestion(currentQuestion);
@@ -90,6 +118,18 @@ function showQuestion(index) {
     }
   };
   form.appendChild(nextBtn);
+}
+
+// Prevent duplicate ranks in the same question
+function updateRadioGroups(optionsDiv, selectedRank) {
+  const allRadios = optionsDiv.querySelectorAll("input");
+  allRadios.forEach(radio => {
+    if (radio.dataset.rank === selectedRank.toString() && !radio.checked) {
+      radio.disabled = true;
+    } else {
+      radio.disabled = false;
+    }
+  });
 }
 
 // Submit survey
