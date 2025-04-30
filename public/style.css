@@ -71,12 +71,8 @@ h1 {
   background-color: #0056b3;
 }
 
-.download-container {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.download-btn {
+/* Admin View Button */
+.admin-view-btn {
   padding: 0.8rem 1.5rem;
   font-size: 1.1rem;
   color: white;
@@ -87,7 +83,7 @@ h1 {
   transition: background-color 0.3s ease;
 }
 
-.download-btn:hover {
+.admin-view-btn:hover {
   background-color: #218838;
 }
 
@@ -152,7 +148,7 @@ h1 {
     padding: 0.8rem;
   }
 
-  .download-btn {
+  .admin-view-btn {
     font-size: 1rem;
     padding: 0.7rem 1.2rem;
   }
