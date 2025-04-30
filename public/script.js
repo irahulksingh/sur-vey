@@ -40,7 +40,7 @@ languageSelect.addEventListener("change", () => {
 });
 
 // Show questions with radio buttons for each rank
-function showQuestion(index) {
+  function showQuestion(index) {
   form.innerHTML = "";
   const questionDiv = document.createElement("div");
   questionDiv.className = "question";
@@ -53,10 +53,12 @@ function showQuestion(index) {
     const optionContainer = document.createElement("div");
     optionContainer.className = "option-container";
 
+    // Option label (text)
     const label = document.createElement("label");
     label.textContent = opt;
     label.className = "option-label";
 
+    // Add radio buttons for each rank (1–5)
     const radioGroup = document.createElement("div");
     radioGroup.className = "radio-group";
 
@@ -72,16 +74,20 @@ function showQuestion(index) {
       const radioLabel = document.createElement("label");
       radioLabel.className = "radio-label";
       radioLabel.textContent = rank;
+
+      // Place the radio button inside the label (for better accessibility)
       radioLabel.appendChild(radio);
 
+      // Append the label to the group
       radioGroup.appendChild(radioLabel);
 
-      // Add event listener to prevent duplicate ranks
+      // Add event listener to handle rank selection
       radio.addEventListener("change", () => updateRanks(optionsDiv, rank));
     }
 
-    optionContainer.appendChild(label);
-    optionContainer.appendChild(radioGroup);
+    // Append the label (option text) and radio group
+    optionContainer.appendChild(label); // Option text
+    optionContainer.appendChild(radioGroup); // Radio buttons underneath
     optionsDiv.appendChild(optionContainer);
   });
 
