@@ -2,7 +2,7 @@ const frågor = [
   "När du ska köpa leksaker, vart vänder du dig först?",
   "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?",
   "Vilken betalningsmetod föredrar du när du handlar leksaker online?",
-  "Vilket alternativ påverkar mest ditt beslut att köpa leksaker?",
+  "Vilket alternativ påverkar mest din nöjdhet vid köp av leksaker online?",
   "Vilka sociala medier påverkar mest ditt beslut att köpa leksaker?",
   "Vad skulle få dig att handla oftare från Åhléns?",
   "Hur viktig är hållbarhet när du väljer leksaker?",
@@ -28,6 +28,14 @@ const alternativ = [
   ["Höga priser", "Dålig kundservice", "Lång leveranstid", "Dåligt sortiment", "Komplicerad retur"]
 ];
 
+const nextButtonText = "Next";
+const submitButtonText = "Submit";
+const rankSelectionText = "Select rank (1–5)";
+const rankErrorText = "Each rank from 1–5 must be used exactly once.";
+const clickSubmitText = "Click Submit to see results.";
+const downloadText = "Download results as CSV";
+
+const form = document.getElementById("survey-form");
 const submitBtn = document.getElementById("submit-btn");
 const downloadBtn = document.getElementById("download-btn");
 let userAnswers = {};
@@ -35,9 +43,7 @@ let currentQuestion = 0;
 
 // Show questions
 function showQuestion(index) {
-  const form = document.getElementById("survey-form");
-  form.innerHTML = ""; // Clear form for new question
-
+  form.innerHTML = "";
   const questionDiv = document.createElement("div");
   questionDiv.className = "question";
   questionDiv.innerHTML = `<h3>Fråga ${index + 1}: ${frågor[index]}</h3>`;
@@ -50,10 +56,11 @@ function showQuestion(index) {
     select.name = `q${index}-${i}`;
     select.dataset.option = opt;
     select.required = true;
+    select.className = "mobile-dropdown";
 
     const defaultOpt = document.createElement("option");
     defaultOpt.value = "";
-    defaultOpt.textContent = "Välj rang (1–5)";
+    defaultOpt.textContent = rankSelectionText;
     defaultOpt.disabled = true;
     defaultOpt.selected = true;
     select.appendChild(defaultOpt);
@@ -76,7 +83,7 @@ function showQuestion(index) {
   form.appendChild(questionDiv);
 
   const nextBtn = document.createElement("button");
-  nextBtn.textContent = "Next";
+  nextBtn.textContent = nextButtonText;
   nextBtn.type = "button";
   nextBtn.className = "next-btn";
   nextBtn.onclick = () => {
@@ -96,7 +103,7 @@ function showQuestion(index) {
     });
 
     if (!valid || usedRanks.size !== 5) {
-      alert("Each rank from 1–5 must be used exactly once.");
+      alert(rankErrorText);
       return;
     }
 
@@ -105,7 +112,9 @@ function showQuestion(index) {
     if (currentQuestion < frågor.length) {
       showQuestion(currentQuestion);
     } else {
+      submitBtn.textContent = submitButtonText;
       submitBtn.style.display = "block";
+      form.innerHTML = `<p>${clickSubmitText}</p>`;
     }
   };
   form.appendChild(nextBtn);
@@ -122,45 +131,62 @@ submitBtn.onclick = async () => {
   const data = await res.json();
   alert(data.message);
 
+  const response = await fetch("/results");
+  const resultData = await response.json();
+
+  const resultsContainer = document.getElementById("results-table");
+  resultsContainer.innerHTML = "";
+
+  let csvContent = "data:text/csv;charset=utf-8,";
+
+  Object.entries(resultData).forEach(([q, options], qIndex) => {
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    thead.innerHTML = `<tr><th>Fråga ${qIndex + 1}</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>`;
+    table.appendChild(thead);
+    csvContent += `\nFråga ${qIndex + 1},1,2,3,4,5\n`;
+
+    const tbody = document.createElement("tbody");
+    Object.entries(options).forEach(([option, value]) => {
+      const row = document.createElement("tr");
+      const rowData = [option];
+      for (let i = 1; i <= 5; i++) {
+        rowData.push(value[i] || 0);
+      }
+      row.innerHTML = `<td>${option}</td>` + rowData.slice(1).map(v => `<td>${v}</td>`).join("");
+      tbody.appendChild(row);
+      csvContent += rowData.join(",") + "\n";
+    });
+
+    table.appendChild(tbody);
+    resultsContainer.appendChild(table);
+    resultsContainer.appendChild(document.createElement("br"));
+  });
+
   downloadBtn.style.display = "block";
 };
 
 // Handle download button click
-downloadBtn.addEventListener("click", async () => {
-  const response = await fetch("/results");
-  const resultData = await response.json();
-
-  const csvContent = generateCSVContent(resultData); // Generate CSV content
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "survey_results.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+downloadBtn.addEventListener("click", () => {
+  const isAdmin = prompt("Enter admin password") === "Survey-2025";
+  if (isAdmin) {
+    alert("Password correct! You can now download the results.");
+    const csvContent = generateCSVContent(); // Function to generate CSV content
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "survey_results.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } else {
+    alert("Incorrect password! Access denied.");
+  }
 });
 
-// Generate CSV content
-function generateCSVContent(resultData) {
-  let csv = "Fråga,Alternativ,Rank 1,Rank 2,Rank 3,Rank 4,Rank 5\n";
-
-  Object.entries(resultData).forEach(([question, options]) => {
-    alternativ.forEach((option, optIndex) => {
-      const row = [
-        frågor[optIndex],
-        option,
-        options[1] || 0,
-        options[2] || 0,
-        options[3] || 0,
-        options[4] || 0,
-        options[5] || 0
-      ];
-      csv += row.join(",") + "\n";
-    });
-  });
-
-  return "data:text/csv;charset=utf-8," + csv;
+// Dummy CSV generation logic (replace with actual logic)
+function generateCSVContent() {
+  return "data:text/csv;charset=utf-8,Fråga,Alternativ 1,Alternativ 2\nExempel Fråga,5,3";
 }
 
-// Initialize the first question
 showQuestion(currentQuestion);
