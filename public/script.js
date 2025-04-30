@@ -2,7 +2,7 @@ const frågor = [
   "När du ska köpa leksaker, vart vänder du dig först?",
   "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?",
   "Vilken betalningsmetod föredrar du när du handlar leksaker online?",
-  "Vilket alternativ påverkar mest din nöjdhet vid köp av leksaker online?",
+  "Vilket alternativ påverkar mest ditt beslut att köpa leksaker online?",
   "Vilka sociala medier påverkar mest ditt beslut att köpa leksaker?",
   "Vad skulle få dig att handla oftare från Åhléns?",
   "Hur viktig är hållbarhet när du väljer leksaker?",
@@ -28,16 +28,14 @@ const alternativ = [
   ["Höga priser", "Dålig kundservice", "Lång leveranstid", "Dåligt sortiment", "Komplicerad retur"]
 ];
 
-const nextButtonText = "Next";
-const submitButtonText = "Submit";
-const rankSelectionText = "Select rank (1–5)";
-const rankErrorText = "Each rank from 1–5 must be used exactly once.";
-const clickSubmitText = "Click Submit to see results.";
-const downloadText = "Download results as CSV";
+const nextButtonText = "Nästa"; // Swedish for "Next"
+const submitButtonText = "Skicka"; // Swedish for "Submit"
+const rankSelectionText = "Välj rang (1–5)"; // Swedish for "Select rank"
+const rankErrorText = "Varje rang från 1 till 5 måste användas exakt en gång."; // Swedish for "Each rank from 1–5 must be used exactly once."
+const clickSubmitText = "Klicka på Skicka för att slutföra enkäten."; // Swedish for "Click Submit to complete the survey."
 
 const form = document.getElementById("survey-form");
 const submitBtn = document.getElementById("submit-btn");
-const downloadBtn = document.getElementById("download-btn");
 let userAnswers = {};
 let currentQuestion = 0;
 
@@ -130,63 +128,7 @@ submitBtn.onclick = async () => {
 
   const data = await res.json();
   alert(data.message);
-
-  const response = await fetch("/results");
-  const resultData = await response.json();
-
-  const resultsContainer = document.getElementById("results-table");
-  resultsContainer.innerHTML = "";
-
-  let csvContent = "data:text/csv;charset=utf-8,";
-
-  Object.entries(resultData).forEach(([q, options], qIndex) => {
-    const table = document.createElement("table");
-    const thead = document.createElement("thead");
-    thead.innerHTML = `<tr><th>Fråga ${qIndex + 1}</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>`;
-    table.appendChild(thead);
-    csvContent += `\nFråga ${qIndex + 1},1,2,3,4,5\n`;
-
-    const tbody = document.createElement("tbody");
-    Object.entries(options).forEach(([option, value]) => {
-      const row = document.createElement("tr");
-      const rowData = [option];
-      for (let i = 1; i <= 5; i++) {
-        rowData.push(value[i] || 0);
-      }
-      row.innerHTML = `<td>${option}</td>` + rowData.slice(1).map(v => `<td>${v}</td>`).join("");
-      tbody.appendChild(row);
-      csvContent += rowData.join(",") + "\n";
-    });
-
-    table.appendChild(tbody);
-    resultsContainer.appendChild(table);
-    resultsContainer.appendChild(document.createElement("br"));
-  });
-
-  downloadBtn.style.display = "block";
 };
 
-// Handle download button click
-downloadBtn.addEventListener("click", () => {
-  const isAdmin = prompt("Enter admin password") === "Survey-2025";
-  if (isAdmin) {
-    alert("Password correct! You can now download the results.");
-    const csvContent = generateCSVContent(); // Function to generate CSV content
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "survey_results.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } else {
-    alert("Incorrect password! Access denied.");
-  }
-});
-
-// Dummy CSV generation logic (replace with actual logic)
-function generateCSVContent() {
-  return "data:text/csv;charset=utf-8,Fråga,Alternativ 1,Alternativ 2\nExempel Fråga,5,3";
-}
-
+// Initialize the first question
 showQuestion(currentQuestion);
