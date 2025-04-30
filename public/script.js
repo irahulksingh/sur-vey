@@ -30,16 +30,15 @@ const options = [
 
 const nextButtonText = "Nästa";
 const submitButtonText = "Skicka";
-const rankSelectionText = "Välj rang (1–5)";
-const rankErrorText = "Varje rang 1–5 måste användas exakt en gång.";
 const clickSubmitText = "Klicka på Skicka för att se resultatet.";
+const adminViewText = "Admin View Results";
 
 const form = document.getElementById("survey-form");
 const submitBtn = document.getElementById("submit-btn");
 let userAnswers = {};
 let currentQuestion = 0;
 
-// Show question
+// Show questions
 function showQuestion(index) {
   form.innerHTML = "";
   const questionDiv = document.createElement("div");
@@ -58,12 +57,11 @@ function showQuestion(index) {
 
     const defaultOpt = document.createElement("option");
     defaultOpt.value = "";
-    defaultOpt.textContent = rankSelectionText;
+    defaultOpt.textContent = "Välj rang (1–5)";
     defaultOpt.disabled = true;
     defaultOpt.selected = true;
     select.appendChild(defaultOpt);
 
-    // Add rank options (1–5)
     for (let r = 1; r <= 5; r++) {
       const optEl = document.createElement("option");
       optEl.value = r;
@@ -105,7 +103,7 @@ function showQuestion(index) {
     });
 
     if (!valid || usedRanks.size !== 5) {
-      alert(rankErrorText);
+      alert("Varje rang 1–5 måste användas exakt en gång.");
       return;
     }
 
@@ -150,37 +148,13 @@ submitBtn.onclick = async () => {
   const data = await res.json();
   alert(data.message);
 
-  const response = await fetch("/results");
-  const resultData = await response.json();
-
   const resultsContainer = document.getElementById("results-table");
-  resultsContainer.innerHTML = "";
+  resultsContainer.innerHTML = `<button id="admin-view-btn" class="admin-view-btn">${adminViewText}</button>`;
 
-  let csvContent = "data:text/csv;charset=utf-8,";
-
-  Object.entries(resultData).forEach(([q, options], qIndex) => {
-    const table = document.createElement("table");
-    const thead = document.createElement("thead");
-    thead.innerHTML = `<tr><th>Fråga ${qIndex + 1}</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>`;
-    table.appendChild(thead);
-    csvContent += `\nFråga ${qIndex + 1},1,2,3,4,5\n`;
-
-    const tbody = document.createElement("tbody");
-    Object.entries(options).forEach(([option, value]) => {
-      const row = document.createElement("tr");
-      const rowData = [option];
-      for (let i = 1; i <= 5; i++) {
-        rowData.push(value[i] || 0);
-      }
-      row.innerHTML = `<td>${option}</td>` + rowData.slice(1).map(v => `<td>${v}</td>`).join("");
-      tbody.appendChild(row);
-      csvContent += rowData.join(",") + "\n";
-    });
-
-    table.appendChild(tbody);
-    resultsContainer.appendChild(table);
-    resultsContainer.appendChild(document.createElement("br"));
-  });
+  const adminViewBtn = document.getElementById("admin-view-btn");
+  adminViewBtn.onclick = () => {
+    window.location.href = "admin-results.html";
+  };
 };
 
 showQuestion(currentQuestion);
