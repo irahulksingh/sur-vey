@@ -71,6 +71,26 @@ h1 {
   background-color: #0056b3;
 }
 
+.download-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.download-btn {
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  color: white;
+  background-color: #28a745;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.download-btn:hover {
+  background-color: #218838;
+}
+
 #results-table {
   margin-top: 40px;
   padding: 20px;
@@ -130,6 +150,11 @@ h1 {
   .submit-btn {
     font-size: 1.1rem;
     padding: 0.8rem;
+  }
+
+  .download-btn {
+    font-size: 1rem;
+    padding: 0.7rem 1.2rem;
   }
 
   #results-table table th, 
