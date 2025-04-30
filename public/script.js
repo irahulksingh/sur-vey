@@ -149,7 +149,11 @@ async function fetchResults() {
     <tr>
       <th>Fråga</th>
       <th>Alternativ</th>
-      <th>Rank</th>
+      <th>Rank 1</th>
+      <th>Rank 2</th>
+      <th>Rank 3</th>
+      <th>Rank 4</th>
+      <th>Rank 5</th>
     </tr>
   `;
   table.appendChild(thead);
@@ -157,12 +161,12 @@ async function fetchResults() {
   // Create table body
   const tbody = document.createElement("tbody");
   Object.entries(resultData).forEach(([question, options]) => {
-    Object.entries(options).forEach(([option, rank]) => {
+    Object.entries(options).forEach(([option, ranks]) => {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${question}</td>
         <td>${option}</td>
-        <td>${rank}</td>
+        ${[1, 2, 3, 4, 5].map(rank => `<td>${ranks[rank] || 0}</td>`).join("")}
       `;
       tbody.appendChild(row);
     });
@@ -171,6 +175,5 @@ async function fetchResults() {
   table.appendChild(tbody);
   resultsContainer.appendChild(table);
 }
-
 // Initialize the first question
 showQuestion(currentQuestion);
