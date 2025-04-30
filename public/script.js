@@ -36,6 +36,7 @@ const clickSubmitText = "Klicka på Skicka för att slutföra enkäten."; // Swe
 
 const form = document.getElementById("survey-form");
 const submitBtn = document.getElementById("submit-btn");
+const resultsContainer = document.getElementById("results-table"); // Div for displaying results
 let userAnswers = {};
 let currentQuestion = 0;
 
@@ -128,7 +129,49 @@ submitBtn.onclick = async () => {
 
   const data = await res.json();
   alert(data.message);
+
+  // Fetch and display the results
+  await fetchResults();
 };
+
+// Fetch and display results
+async function fetchResults() {
+  const response = await fetch("/results");
+  const resultData = await response.json();
+
+  resultsContainer.innerHTML = ""; // Clear previous results
+
+  Object.entries(resultData).forEach(([q, options], qIndex) => {
+    const table = document.createElement("table");
+    table.className = "result-table";
+
+    const thead = document.createElement("thead");
+    thead.innerHTML = `<tr>
+      <th>Fråga ${qIndex + 1}</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+    </tr>`;
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    Object.entries(options).forEach(([option, value]) => {
+      const row = document.createElement("tr");
+      const rowData = [option];
+      for (let i = 1; i <= 5; i++) {
+        rowData.push(value[i] || 0);
+      }
+      row.innerHTML = `<td>${option}</td>` + rowData.slice(1).map(v => `<td>${v}</td>`).join("");
+      tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+    resultsContainer.appendChild(table);
+    resultsContainer.appendChild(document.createElement("br"));
+  });
+}
 
 // Initialize the first question
 showQuestion(currentQuestion);
