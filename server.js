@@ -1,37 +1,52 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const fs = require("fs-extra");
 const path = require("path");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Path to the JSON file for storing results
+const DB_PATH = path.join(__dirname, "db.json");
+
+// Middleware for parsing JSON and serving static files
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-let allAnswers = [];
+// Initialize JSON file if it doesn't exist
+if (!fs.existsSync(DB_PATH)) {
+  fs.writeFileSync(DB_PATH, JSON.stringify({}));
+}
 
-app.post("/submit", (req, res) => {
-  const answers = req.body;
-  allAnswers.push(answers);
-  res.json({ message: "Svar skickades!" });
+// API: Get survey results
+app.get("/api/results", (req, res) => {
+  const data = fs.readJSONSync(DB_PATH);
+  res.json(data);
 });
 
-app.get("/results", (req, res) => {
-  const resultSummary = {};
+// API: Submit survey
+app.post("/api/submit", (req, res) => {
+  const surveyData = req.body;
 
-  allAnswers.forEach((response) => {
-    Object.entries(response).forEach(([qKey, options]) => {
-      if (!resultSummary[qKey]) resultSummary[qKey] = {};
+  let results = fs.readJSONSync(DB_PATH);
 
-      Object.entries(options).forEach(([option, rank]) => {
-        if (!resultSummary[qKey][option]) resultSummary[qKey][option] = {};
-        if (!resultSummary[qKey][option][rank]) resultSummary[qKey][option][rank] = 0;
+  // Update results for each question and option
+  for (const [questionId, selectedOption] of Object.entries(surveyData)) {
+    if (!results[questionId]) {
+      results[questionId] = {};
+    }
+    if (!results[questionId][selectedOption]) {
+      results[questionId][selectedOption] = 0;
+    }
+    results[questionId][selectedOption] += 1;
+  }
 
-        resultSummary[qKey][option][rank]++;
-      });
-    });
-  });
-
-  res.json(resultSummary);
+  // Save updated results to the JSON file
+  fs.writeJSONSync(DB_PATH, results);
+  res.json({ message: "Survey submitted successfully!" });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
