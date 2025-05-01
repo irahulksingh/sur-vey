@@ -1,52 +1,64 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const fs = require("fs-extra");
-const path = require("path");
+const { MongoClient } = require("mongodb");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Path to the JSON file for storing results
-const DB_PATH = path.join(__dirname, "db.json");
+// MongoDB connection URI (replace <username> and <password> with your credentials)
+const MONGO_URI = process.env.MONGO_URI;
+const DATABASE_NAME = "surveyDB"; // Name of your database
 
 // Middleware for parsing JSON and serving static files
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 
-// Initialize JSON file if it doesn't exist
-if (!fs.existsSync(DB_PATH)) {
-  fs.writeFileSync(DB_PATH, JSON.stringify({}));
-}
+// MongoDB client
+let db;
+
+// Connect to MongoDB Atlas
+(async function connectDB() {
+  try {
+    const client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    await client.connect();
+    db = client.db(DATABASE_NAME);
+    console.log("Connected to MongoDB Atlas");
+  } catch (err) {
+    console.error("Failed to connect to MongoDB Atlas:", err);
+  }
+})();
 
 // API: Get survey results
-app.get("/api/results", (req, res) => {
-  const data = fs.readJSONSync(DB_PATH);
-  res.json(data);
+app.get("/api/results", async (req, res) => {
+  try {
+    const results = await db.collection("results").find({}).toArray();
+    res.json(results);
+  } catch (err) {
+    console.error("Error fetching results:", err);
+    res.status(500).json({ error: "Failed to fetch results" });
+  }
 });
 
 // API: Submit survey
-app.post("/api/submit", (req, res) => {
+app.post("/api/submit", async (req, res) => {
   const surveyData = req.body;
 
-  let results = fs.readJSONSync(DB_PATH);
-
-  // Update results for each question and option
-  for (const [questionId, selectedOptions] of Object.entries(surveyData)) {
-    if (!results[questionId]) {
-      results[questionId] = {};
-    }
-
-    for (const [option, rank] of Object.entries(selectedOptions)) {
-      if (!results[questionId][option]) {
-        results[questionId][option] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  try {
+    for (const [questionId, selectedOptions] of Object.entries(surveyData)) {
+      for (const [option, rank] of Object.entries(selectedOptions)) {
+        // Increment the rank counts for the given option
+        await db.collection("results").updateOne(
+          { questionId, option },
+          { $inc: { [`ranks.${rank}`]: 1 } }, // Increment rank count
+          { upsert: true } // Insert if document doesn't exist
+        );
       }
-      results[questionId][option][rank] += 1;
     }
+    res.json({ message: "Survey submitted successfully!" });
+  } catch (err) {
+    console.error("Error submitting survey:", err);
+    res.status(500).json({ error: "Failed to submit survey" });
   }
-
-  // Save updated results to the JSON file
-  fs.writeJSONSync(DB_PATH, results);
-  res.json({ message: "Survey submitted successfully!" });
 });
 
 // Start the server
