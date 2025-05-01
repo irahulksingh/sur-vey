@@ -152,22 +152,10 @@ function deselectDuplicateRanks(optionsDiv, selectedRank, selectedRadio) {
   });
 }
 
-// Prevent duplicate ranks
-function updateRanks(optionsDiv, selectedRank) {
-  const allRadios = optionsDiv.querySelectorAll("input");
-  allRadios.forEach(radio => {
-    if (radio.value === selectedRank.toString() && !radio.checked) {
-      radio.disabled = true;
-    } else {
-      radio.disabled = false;
-    }
-  });
-}
-
 // Submit survey
 submitBtn.onclick = async () => {
   submitBtn.disabled = true; // Disable the button after submission
-  const res = await fetch("/submit", {
+  const res = await fetch("/api/submit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userAnswers)
@@ -182,7 +170,7 @@ submitBtn.onclick = async () => {
 
 // Fetch and display results
 async function fetchResults() {
-  const response = await fetch("/results");
+  const response = await fetch("/api/results");
   const resultData = await response.json();
 
   resultsContainer.innerHTML = ""; // Clear previous results
@@ -212,7 +200,7 @@ async function fetchResults() {
     const totalOptions = Object.keys(options).length; // Count the number of options for the current question
     let isFirstRowForQuestion = true;
 
-    Object.entries(options).forEach(([option, ranks], optionIndex) => {
+    Object.entries(options).forEach(([option, ranks]) => {
       const row = document.createElement("tr");
 
       // Add the "Fråga" (Question) column only for the first row of the question
