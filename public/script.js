@@ -1,63 +1,23 @@
 const questions = {
   sv: [
     "När du ska köpa leksaker, vart vänder du dig först?",
-    "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?",
-    "Hur ofta köper du leksaker på ett år?",
-    "Föredrar du fysiska butiker eller online shopping för leksaker?",
-    "Vilken typ av leksaker tycker dina barn mest om?",
-    "Hur viktigt är priset när du köper leksaker?",
-    "Hur nöjd är du med utbudet av leksaker i butikerna?",
-    "Skulle du rekommendera din favorit-leksaksbutik till andra?",
-    "Hur viktigt är leveranshastigheten när du handlar leksaker online?",
-    "Tar du hänsyn till hållbarhet när du köper leksaker?",
-    "Hur mycket spenderar du vanligtvis på leksaker per månad?",
-    "Föredrar du märkesleksaker framför icke-märkesleksaker?"
+    "Vilken faktor påverkar mest ditt val av butik vid köp av leksaker?"
   ],
   en: [
     "When buying toys, where do you go first?",
-    "What factor most influences your choice of store when buying toys?",
-    "How often do you buy toys in a year?",
-    "Do you prefer physical stores or online shopping for toys?",
-    "What type of toys do your children enjoy the most?",
-    "How important is price when buying toys?",
-    "How satisfied are you with the variety of toys available in stores?",
-    "Would you recommend your favorite toy store to others?",
-    "How important is delivery speed when shopping for toys online?",
-    "Do you consider sustainability when buying toys?",
-    "How much do you usually spend on toys per month?",
-    "Do you prefer branded toys over non-branded ones?"
+    "What factor most influences your choice of store when buying toys?"
   ]
 };
 
 const options = {
   sv: [
     ["Fysisk leksaksbutik", "Svensk nätbutik", "Åhléns", "Internationell e-handelsplattform", "Varuhus/lågprisbutik"],
-    ["Pris", "Leveranstid", "Sortiment/Produktutbud", "Kundservice och rådgivning", "Enkelhet att beställa"],
-    ["Klarna", "Kredit-/betalkort", "Swish", "PayPal", "Direkt bankbetalning"],
-    ["Snabb leverans", "Fri frakt", "Enkel returhantering", "Kundsupportens tillgänglighet", "Produktens kvalitet"],
-    ["Facebook", "Instagram", "TikTok", "YouTube", "Inget socialt media påverkar mig"],
-    ["Lägre priser", "Snabbare leveranser", "Större sortiment", "Fler kampanjer", "Mer hållbara produkter"],
-    ["Viktigast av allt", "Mycket viktigt", "Ganska viktigt", "Mindre viktigt", "Oviktigt"],
-    ["Rekommendationer", "Sociala medier", "Reklam", "Besök i butik", "Söka online"],
-    ["0–2 år", "3–5 år", "6–9 år", "10–12 år", "Över 12 år"],
-    ["Trendig", "Unik", "Pedagogisk", "Hållbar", "Prisvärd"],
-    ["Traditionella leksaker", "Elektroniska leksaker", "Pyssel", "Utomhusleksaker", "Samlarprodukter"],
-    ["Höga priser", "Dålig kundservice", "Lång leveranstid", "Dåligt sortiment", "Komplicerad retur"]
+    ["Pris", "Leveranstid", "Sortiment/Produktutbud", "Kundservice och rådgivning", "Enkelhet att beställa"]
   ],
-  en:[
-  ["Physical toy store", "Swedish online store", "Åhléns", "International e-commerce platform", "Department store/discount store"],
-  ["Price", "Delivery time", "Assortment/Product range", "Customer service and advice", "Ease of ordering"],
-  ["Klarna", "Credit/Debit card", "Swish", "PayPal", "Direct bank payment"],
-  ["Fast delivery", "Free shipping", "Easy return handling", "Customer support availability", "Product quality"],
-  ["Facebook", "Instagram", "TikTok", "YouTube", "No social media influences me"],
-  ["Lower prices", "Faster deliveries", "Larger assortment", "More campaigns", "More sustainable products"],
-  ["Most important", "Very important", "Quite important", "Less important", "Not important"],
-  ["Recommendations", "Social media", "Advertising", "In-store visits", "Search online"],
-  ["0–2 years", "3–5 years", "6–9 years", "10–12 years", "Over 12 years"],
-  ["Trendy", "Unique", "Educational", "Sustainable", "Affordable"],
-  ["Traditional toys", "Electronic toys", "Crafts", "Outdoor toys", "Collectibles"],
-  ["High prices", "Poor customer service", "Long delivery times", "Poor assortment", "Complicated returns"]
-];
+  en: [
+    ["Physical toy store", "Swedish online store", "Åhléns", "International e-commerce platform", "Department/discount store"],
+    ["Price", "Delivery time", "Selection/Product range", "Customer support and advice", "Ease of ordering"]
+  ]
 };
 
 let currentLanguage = "sv";
