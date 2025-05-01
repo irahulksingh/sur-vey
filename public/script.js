@@ -33,31 +33,31 @@ const options = {
   sv: [
     ["Fysisk leksaksbutik", "Svensk nätbutik", "Åhléns", "Internationell e-handelsplattform", "Varuhus/lågprisbutik"],
     ["Pris", "Leveranstid", "Sortiment/Produktutbud", "Kundservice och rådgivning", "Enkelhet att beställa"],
-    ["En gång i månaden", "Varannan månad", "En gång i halvåret", "En gång om året", "Sällan eller aldrig"],
-    ["Fysiska butiker", "Online shopping", "Båda lika mycket"],
-    ["Pedagogiska leksaker", "Byggleksaker", "Dockor och mjukisdjur", "Elektroniska leksaker", "Utomhusleksaker"],
-    ["Mycket viktigt", "Ganska viktigt", "Inte så viktigt", "Helt oviktigt"],
-    ["Mycket nöjd", "Nöjd", "Neutral", "Missnöjd", "Mycket missnöjd"],
-    ["Ja, definitivt", "Ja, förmodligen", "Inte säker", "Förmodligen inte", "Nej, aldrig"],
-    ["Mycket viktigt", "Ganska viktigt", "Inte så viktigt", "Helt oviktigt"],
-    ["Ja, alltid", "Ja, ibland", "Sällan", "Aldrig"],
-    ["Mindre än 500 kr", "500–1000 kr", "1000–2000 kr", "2000–5000 kr", "Mer än 5000 kr"],
-    ["Ja, alltid", "Ja, ibland", "Inte så ofta", "Aldrig"]
+    ["Klarna", "Kredit-/betalkort", "Swish", "PayPal", "Direkt bankbetalning"],
+    ["Snabb leverans", "Fri frakt", "Enkel returhantering", "Kundsupportens tillgänglighet", "Produktens kvalitet"],
+    ["Facebook", "Instagram", "TikTok", "YouTube", "Inget socialt media påverkar mig"],
+    ["Lägre priser", "Snabbare leveranser", "Större sortiment", "Fler kampanjer", "Mer hållbara produkter"],
+    ["Viktigast av allt", "Mycket viktigt", "Ganska viktigt", "Mindre viktigt", "Oviktigt"],
+    ["Rekommendationer", "Sociala medier", "Reklam", "Besök i butik", "Söka online"],
+    ["0–2 år", "3–5 år", "6–9 år", "10–12 år", "Över 12 år"],
+    ["Trendig", "Unik", "Pedagogisk", "Hållbar", "Prisvärd"],
+    ["Traditionella leksaker", "Elektroniska leksaker", "Pyssel", "Utomhusleksaker", "Samlarprodukter"],
+    ["Höga priser", "Dålig kundservice", "Lång leveranstid", "Dåligt sortiment", "Komplicerad retur"]
   ],
-  en: [
-    ["Physical toy store", "Swedish online store", "Åhléns", "International e-commerce platform", "Department/discount store"],
-    ["Price", "Delivery time", "Selection/Product range", "Customer support and advice", "Ease of ordering"],
-    ["Once a month", "Every two months", "Twice a year", "Once a year", "Rarely or never"],
-    ["Physical stores", "Online shopping", "Both equally"],
-    ["Educational toys", "Building toys", "Dolls and stuffed animals", "Electronic toys", "Outdoor toys"],
-    ["Very important", "Somewhat important", "Not very important", "Not important at all"],
-    ["Very satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very dissatisfied"],
-    ["Yes, definitely", "Yes, probably", "Not sure", "Probably not", "No, never"],
-    ["Very important", "Somewhat important", "Not very important", "Not important at all"],
-    ["Yes, always", "Yes, sometimes", "Rarely", "Never"],
-    ["Less than $50", "$50–$100", "$100–$200", "$200–$500", "More than $500"],
-    ["Yes, always", "Yes, sometimes", "Not often", "Never"]
-  ]
+  en:[
+  ["Physical toy store", "Swedish online store", "Åhléns", "International e-commerce platform", "Department store/discount store"],
+  ["Price", "Delivery time", "Assortment/Product range", "Customer service and advice", "Ease of ordering"],
+  ["Klarna", "Credit/Debit card", "Swish", "PayPal", "Direct bank payment"],
+  ["Fast delivery", "Free shipping", "Easy return handling", "Customer support availability", "Product quality"],
+  ["Facebook", "Instagram", "TikTok", "YouTube", "No social media influences me"],
+  ["Lower prices", "Faster deliveries", "Larger assortment", "More campaigns", "More sustainable products"],
+  ["Most important", "Very important", "Quite important", "Less important", "Not important"],
+  ["Recommendations", "Social media", "Advertising", "In-store visits", "Search online"],
+  ["0–2 years", "3–5 years", "6–9 years", "10–12 years", "Over 12 years"],
+  ["Trendy", "Unique", "Educational", "Sustainable", "Affordable"],
+  ["Traditional toys", "Electronic toys", "Crafts", "Outdoor toys", "Collectibles"],
+  ["High prices", "Poor customer service", "Long delivery times", "Poor assortment", "Complicated returns"]
+];
 };
 
 let currentLanguage = "sv";
