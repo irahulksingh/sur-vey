@@ -16,98 +16,11 @@
         <option value="en">English</option>
       </select>
     </div>
-    
     <h1 id="survey-title">Enkätundersökning</h1>
-    
-    <!-- Survey Form -->
-    <form id="survey-form">
-      <!-- Questions will be dynamically inserted here -->
-    </form>
-    
-    <button id="submit-btn" class="submit-btn">Skicka</button>
+    <form id="survey-form"></form>
+    <button id="submit-btn" class="submit-btn" style="display:none;">Skicka</button>
+    <div id="results-table"></div> <!-- Results will be shown here -->
   </div>
-
-  <script>
-    // Survey Questions
-    const questions = {
-      sv: [
-        "Fysisk leksaksbutik",
-        "Svensk nätbutik",
-        "Åhléns",
-        "Internationell e-handelsplattform",
-        "Varuhus/lågprisbutik"
-      ],
-      en: [
-        "Physical toy store",
-        "Swedish online store",
-        "Åhléns",
-        "International e-commerce platform",
-        "Department/discount store"
-      ]
-    };
-
-    // Load Survey Form Dynamically
-    const loadSurveyForm = (language = "sv") => {
-      const surveyForm = document.getElementById("survey-form");
-      surveyForm.innerHTML = ""; // Clear existing form content
-
-      questions[language].forEach((question, index) => {
-        const questionContainer = document.createElement("div");
-        questionContainer.classList.add("question-container");
-
-        const label = document.createElement("label");
-        label.textContent = question;
-
-        questionContainer.appendChild(label);
-
-        // Create radio buttons for rankings (1-5)
-        for (let i = 1; i <= 5; i++) {
-          const radioButton = document.createElement("input");
-          radioButton.type = "radio";
-          radioButton.name = `question-${index}`;
-          radioButton.value = i;
-          radioButton.id = `question-${index}-rank-${i}`;
-
-          const radioLabel = document.createElement("label");
-          radioLabel.textContent = i;
-          radioLabel.for = radioButton.id;
-
-          questionContainer.appendChild(radioButton);
-          questionContainer.appendChild(radioLabel);
-        }
-
-        surveyForm.appendChild(questionContainer);
-      });
-    };
-
-    // Handle Language Toggle
-    const languageSelect = document.getElementById("language-select");
-    languageSelect.addEventListener("change", (e) => {
-      const selectedLanguage = e.target.value;
-      loadSurveyForm(selectedLanguage);
-    });
-
-    // Handle Form Submission
-    const submitSurvey = () => {
-      const surveyForm = document.getElementById("survey-form");
-      const formData = new FormData(surveyForm);
-
-      const results = {};
-      for (let pair of formData.entries()) {
-        results[pair[0]] = pair[1];
-      }
-
-      console.log("Survey submitted:", results);
-      alert("Survey submitted successfully!");
-    };
-
-    document.getElementById("submit-btn").addEventListener("click", (e) => {
-      e.preventDefault(); // Prevent default form submission
-      submitSurvey();
-    });
-
-    // Load the form on page load
-    window.onload = () => loadSurveyForm("sv");
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>

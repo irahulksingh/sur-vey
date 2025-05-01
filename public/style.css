@@ -153,36 +153,3 @@ h1 {
 }
 
 
-
-.container {
-  width: 80%;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.question-container {
-  margin: 20px 0;
-}
-
-label {
-  font-size: 16px;
-  margin-right: 10px;
-}
-
-input[type="radio"] {
-  margin: 0 5px;
-}
-
-.submit-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.submit-btn:hover {
-  background-color: #218838;
-}
