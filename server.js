@@ -31,14 +31,17 @@ app.post("/api/submit", (req, res) => {
   let results = fs.readJSONSync(DB_PATH);
 
   // Update results for each question and option
-  for (const [questionId, selectedOption] of Object.entries(surveyData)) {
+  for (const [questionId, selectedOptions] of Object.entries(surveyData)) {
     if (!results[questionId]) {
       results[questionId] = {};
     }
-    if (!results[questionId][selectedOption]) {
-      results[questionId][selectedOption] = 0;
+
+    for (const [option, rank] of Object.entries(selectedOptions)) {
+      if (!results[questionId][option]) {
+        results[questionId][option] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      }
+      results[questionId][option][rank] += 1;
     }
-    results[questionId][selectedOption] += 1;
   }
 
   // Save updated results to the JSON file
