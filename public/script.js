@@ -53,12 +53,10 @@ function showQuestion(index) {
     const optionContainer = document.createElement("div");
     optionContainer.className = "option-container";
 
-    // Option label (text)
     const label = document.createElement("label");
     label.textContent = opt;
     label.className = "option-label";
 
-    // Add radio buttons for each rank (1–5)
     const radioGroup = document.createElement("div");
     radioGroup.className = "radio-group";
 
@@ -75,19 +73,16 @@ function showQuestion(index) {
       radioLabel.className = "radio-label";
       radioLabel.textContent = rank;
 
-      // Place the radio button inside the label (for better accessibility)
       radioLabel.appendChild(radio);
       radioGroup.appendChild(radioLabel);
 
-      // Add event listener to handle deselecting duplicate ranks
       radio.addEventListener("change", () => {
         deselectDuplicateRanks(optionsDiv, rank, radio);
       });
     }
 
-    // Append the label (option text) and radio group
-    optionContainer.appendChild(label); // Option text
-    optionContainer.appendChild(radioGroup); // Radio buttons underneath
+    optionContainer.appendChild(label);
+    optionContainer.appendChild(radioGroup);
     optionsDiv.appendChild(optionContainer);
   });
 
@@ -99,9 +94,7 @@ function showQuestion(index) {
   nextBtn.type = "button";
   nextBtn.className = "next-btn";
 
-  // On clicking "Next"
   nextBtn.onclick = () => {
-    // Validate if each option has a selected rank
     const selectedRanks = Array.from(optionsDiv.querySelectorAll("input:checked"));
     if (selectedRanks.length !== options[currentLanguage][index].length) {
       alert(
@@ -112,7 +105,6 @@ function showQuestion(index) {
       return;
     }
 
-    // Collect answers for the current question
     const answers = {};
     selectedRanks.forEach(radio => {
       answers[radio.dataset.option] = parseInt(radio.value);
@@ -121,7 +113,6 @@ function showQuestion(index) {
     userAnswers[`q${index + 1}`] = answers;
     currentQuestion++;
 
-    // Show the next question or submit the form
     if (currentQuestion < questions[currentLanguage].length) {
       showQuestion(currentQuestion);
     } else {
@@ -143,18 +134,18 @@ function deselectDuplicateRanks(optionsDiv, selectedRank, selectedRadio) {
   const allRadios = optionsDiv.querySelectorAll("input");
   allRadios.forEach(radio => {
     if (
-      radio !== selectedRadio && // Don't deselect the currently selected radio
+      radio !== selectedRadio &&
       radio.value === selectedRank.toString() &&
       radio.checked
     ) {
-      radio.checked = false; // Uncheck the radio button with the same rank
+      radio.checked = false;
     }
   });
 }
 
 // Submit survey
 submitBtn.onclick = async () => {
-  submitBtn.disabled = true; // Disable the button after submission
+  submitBtn.disabled = true;
   const res = await fetch("/api/submit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -164,7 +155,6 @@ submitBtn.onclick = async () => {
   const data = await res.json();
   alert(data.message);
 
-  // Fetch and display results
   await fetchResults();
 };
 
@@ -173,12 +163,11 @@ async function fetchResults() {
   const response = await fetch("/api/results");
   const resultData = await response.json();
 
-  resultsContainer.innerHTML = ""; // Clear previous results
+  resultsContainer.innerHTML = "";
 
   const table = document.createElement("table");
   table.className = "result-table";
 
-  // Create table header
   const thead = document.createElement("thead");
   thead.innerHTML = `
     <tr>
@@ -193,38 +182,32 @@ async function fetchResults() {
   `;
   table.appendChild(thead);
 
-  // Create table body
   const tbody = document.createElement("tbody");
 
-  Object.entries(resultData).forEach(([question, options], index) => {
-    const totalOptions = Object.keys(options).length; // Count the number of options for the current question
+  Object.entries(resultData).forEach(([questionId, options], index) => {
+    const totalOptions = Object.keys(options).length;
     let isFirstRowForQuestion = true;
 
     Object.entries(options).forEach(([option, ranks]) => {
       const row = document.createElement("tr");
 
-      // Add the "Fråga" (Question) column only for the first row of the question
       if (isFirstRowForQuestion) {
         const questionCell = document.createElement("td");
-        questionCell.rowSpan = totalOptions; // Merge rows for this question
-        questionCell.textContent = `${index + 1}`; // Display the question number (1, 2, etc.)
-        questionCell.className = "merged-question-cell"; // Add a class for styling
+        questionCell.rowSpan = totalOptions;
+        questionCell.textContent = `${index + 1}`;
+        questionCell.className = "merged-question-cell";
 
-        // Append the question cell to the row
         row.appendChild(questionCell);
-
         isFirstRowForQuestion = false;
       }
 
-      // Add the option name and ranks
       const optionCell = document.createElement("td");
       optionCell.textContent = option;
       row.appendChild(optionCell);
 
-      // Add rank columns
       [1, 2, 3, 4, 5].forEach(rank => {
         const rankCell = document.createElement("td");
-        rankCell.textContent = ranks[rank] || 0; // Show 0 if no rank is assigned
+        rankCell.textContent = ranks[rank] || 0;
         row.appendChild(rankCell);
       });
 
