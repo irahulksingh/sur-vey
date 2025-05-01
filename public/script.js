@@ -39,6 +39,7 @@ languageSelect.addEventListener("change", () => {
   showQuestion(currentQuestion);
 });
 
+// Show questions with radio buttons for each rank
 function showQuestion(index) {
   form.innerHTML = "";
   const questionDiv = document.createElement("div");
@@ -150,6 +151,7 @@ function deselectDuplicateRanks(optionsDiv, selectedRank, selectedRadio) {
     }
   });
 }
+
 // Prevent duplicate ranks
 function updateRanks(optionsDiv, selectedRank) {
   const allRadios = optionsDiv.querySelectorAll("input");
