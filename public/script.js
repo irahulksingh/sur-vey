@@ -185,11 +185,12 @@ async function fetchResults() {
   const response = await fetch("/results");
   const resultData = await response.json();
 
-  resultsContainer.innerHTML = "";
+  resultsContainer.innerHTML = ""; // Clear previous results
 
   const table = document.createElement("table");
   table.className = "result-table";
 
+  // Create table header
   const thead = document.createElement("thead");
   thead.innerHTML = `
     <tr>
@@ -204,15 +205,41 @@ async function fetchResults() {
   `;
   table.appendChild(thead);
 
+  // Create table body
   const tbody = document.createElement("tbody");
-  Object.entries(resultData).forEach(([question, options]) => {
-    Object.entries(options).forEach(([option, ranks]) => {
+
+  Object.entries(resultData).forEach(([question, options], index) => {
+    const totalOptions = Object.keys(options).length; // Count the number of options for the current question
+    let isFirstRowForQuestion = true;
+
+    Object.entries(options).forEach(([option, ranks], optionIndex) => {
       const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${question}</td>
-        <td>${option}</td>
-        ${[1, 2, 3, 4, 5].map(rank => `<td>${ranks[rank] || 0}</td>`).join("")}
-      `;
+
+      // Add the "Fråga" (Question) column only for the first row of the question
+      if (isFirstRowForQuestion) {
+        const questionCell = document.createElement("td");
+        questionCell.rowSpan = totalOptions; // Merge rows for this question
+        questionCell.textContent = `${index + 1}`; // Display the question number (1, 2, etc.)
+        questionCell.className = "merged-question-cell"; // Add a class for styling
+
+        // Append the question cell to the row
+        row.appendChild(questionCell);
+
+        isFirstRowForQuestion = false;
+      }
+
+      // Add the option name and ranks
+      const optionCell = document.createElement("td");
+      optionCell.textContent = option;
+      row.appendChild(optionCell);
+
+      // Add rank columns
+      [1, 2, 3, 4, 5].forEach(rank => {
+        const rankCell = document.createElement("td");
+        rankCell.textContent = ranks[rank] || 0; // Show 0 if no rank is assigned
+        row.appendChild(rankCell);
+      });
+
       tbody.appendChild(row);
     });
   });
