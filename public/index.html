@@ -16,125 +16,98 @@
         <option value="en">English</option>
       </select>
     </div>
-
+    
     <h1 id="survey-title">Enkätundersökning</h1>
     
     <!-- Survey Form -->
-    <form id="survey-form"></form>
-    <button id="submit-btn" class="submit-btn" style="display:none;">Skicka</button>
+    <form id="survey-form">
+      <!-- Questions will be dynamically inserted here -->
+    </form>
     
-    <!-- Results Section -->
-    <div id="results-table">
-      <h2 id="results-title" style="display: none;">Resultat</h2>
-      <table id="ranksTable" style="display: none; width: 100%; border-collapse: collapse;">
-        <thead>
-          <tr>
-            <th>Rank 1</th>
-            <th>Rank 2</th>
-            <th>Rank 3</th>
-            <th>Rank 4</th>
-            <th>Rank 5</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Rows will be dynamically added here -->
-        </tbody>
-      </table>
-    </div>
+    <button id="submit-btn" class="submit-btn">Skicka</button>
   </div>
 
   <script>
-    // Function to dynamically load the survey form
-    const loadSurveyForm = () => {
+    // Survey Questions
+    const questions = {
+      sv: [
+        "Fysisk leksaksbutik",
+        "Svensk nätbutik",
+        "Åhléns",
+        "Internationell e-handelsplattform",
+        "Varuhus/lågprisbutik"
+      ],
+      en: [
+        "Physical toy store",
+        "Swedish online store",
+        "Åhléns",
+        "International e-commerce platform",
+        "Department/discount store"
+      ]
+    };
+
+    // Load Survey Form Dynamically
+    const loadSurveyForm = (language = "sv") => {
       const surveyForm = document.getElementById("survey-form");
-      surveyForm.innerHTML = `
-        <!-- Add your form fields dynamically here -->
-        <label for="question1">Fråga 1:</label>
-        <input type="text" id="question1" name="question1"><br>
-        <label for="question2">Fråga 2:</label>
-        <input type="text" id="question2" name="question2"><br>
-      `;
-      document.getElementById("submit-btn").style.display = "block";
-    };
+      surveyForm.innerHTML = ""; // Clear existing form content
 
-    // Function to handle survey submission
-    const submitSurvey = async () => {
-      const formData = {
-        question1: document.getElementById("question1").value,
-        question2: document.getElementById("question2").value
-      };
+      questions[language].forEach((question, index) => {
+        const questionContainer = document.createElement("div");
+        questionContainer.classList.add("question-container");
 
-      try {
-        // Submit survey data to the backend
-        const response = await fetch('/api/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
+        const label = document.createElement("label");
+        label.textContent = question;
 
-        if (response.ok) {
-          // Load the ranks table after a successful submission
-          loadRanksTable();
-        } else {
-          console.error("Failed to submit survey.");
+        questionContainer.appendChild(label);
+
+        // Create radio buttons for rankings (1-5)
+        for (let i = 1; i <= 5; i++) {
+          const radioButton = document.createElement("input");
+          radioButton.type = "radio";
+          radioButton.name = `question-${index}`;
+          radioButton.value = i;
+          radioButton.id = `question-${index}-rank-${i}`;
+
+          const radioLabel = document.createElement("label");
+          radioLabel.textContent = i;
+          radioLabel.for = radioButton.id;
+
+          questionContainer.appendChild(radioButton);
+          questionContainer.appendChild(radioLabel);
         }
-      } catch (error) {
-        console.error("Error submitting survey:", error);
-      }
+
+        surveyForm.appendChild(questionContainer);
+      });
     };
 
-    // Function to fetch and display ranks
-    const loadRanksTable = async () => {
-      try {
-        const response = await fetch('/api/ranks'); // Fetch ranks data from the backend
-        const ranksData = await response.json();
+    // Handle Language Toggle
+    const languageSelect = document.getElementById("language-select");
+    languageSelect.addEventListener("change", (e) => {
+      const selectedLanguage = e.target.value;
+      loadSurveyForm(selectedLanguage);
+    });
 
-        const table = document.getElementById("ranksTable");
-        const tableBody = table.querySelector("tbody");
-        tableBody.innerHTML = ""; // Clear existing rows
+    // Handle Form Submission
+    const submitSurvey = () => {
+      const surveyForm = document.getElementById("survey-form");
+      const formData = new FormData(surveyForm);
 
-        // Populate the table with ranks data
-        ranksData.forEach(rankObj => {
-          const row = document.createElement("tr");
-          rankObj.ranks.forEach(rank => {
-            const cell = document.createElement("td");
-            cell.textContent = rank;
-            row.appendChild(cell);
-          });
-          tableBody.appendChild(row);
-        });
-
-        // Show the results table
-        document.getElementById("results-title").style.display = "block";
-        table.style.display = "table";
-      } catch (error) {
-        console.error("Error fetching ranks:", error);
+      const results = {};
+      for (let pair of formData.entries()) {
+        results[pair[0]] = pair[1];
       }
+
+      console.log("Survey submitted:", results);
+      alert("Survey submitted successfully!");
     };
 
-    // Event Listeners
-    document.getElementById("submit-btn").addEventListener("click", (event) => {
-      event.preventDefault();
+    document.getElementById("submit-btn").addEventListener("click", (e) => {
+      e.preventDefault(); // Prevent default form submission
       submitSurvey();
     });
 
-    // Language toggle functionality
-    document.getElementById("language-select").addEventListener("change", (event) => {
-      const selectedLanguage = event.target.value;
-      const title = document.getElementById("survey-title");
-      const button = document.getElementById("submit-btn");
-
-      if (selectedLanguage === "sv") {
-        title.textContent = "Enkätundersökning";
-        button.textContent = "Skicka";
-      } else if (selectedLanguage === "en") {
-        title.textContent = "Survey";
-        button.textContent = "Submit";
-      }
-    });
-
-    // Load the survey form on page load
-    window.onload = loadSurveyForm;
+    // Load the form on page load
+    window.onload = () => loadSurveyForm("sv");
   </script>
 </body>
 </html>
