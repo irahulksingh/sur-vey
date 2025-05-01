@@ -39,8 +39,7 @@ languageSelect.addEventListener("change", () => {
   showQuestion(currentQuestion);
 });
 
-// Show questions with radio buttons for each rank
-  function showQuestion(index) {
+function showQuestion(index) {
   form.innerHTML = "";
   const questionDiv = document.createElement("div");
   questionDiv.className = "question";
@@ -77,12 +76,12 @@ languageSelect.addEventListener("change", () => {
 
       // Place the radio button inside the label (for better accessibility)
       radioLabel.appendChild(radio);
-
-      // Append the label to the group
       radioGroup.appendChild(radioLabel);
 
-      // Add event listener to handle rank selection
-      radio.addEventListener("change", () => updateRanks(optionsDiv, rank));
+      // Add event listener to handle deselecting duplicate ranks
+      radio.addEventListener("change", () => {
+        deselectDuplicateRanks(optionsDiv, rank, radio);
+      });
     }
 
     // Append the label (option text) and radio group
@@ -138,6 +137,19 @@ languageSelect.addEventListener("change", () => {
   form.appendChild(nextBtn);
 }
 
+// Function to deselect duplicate ranks
+function deselectDuplicateRanks(optionsDiv, selectedRank, selectedRadio) {
+  const allRadios = optionsDiv.querySelectorAll("input");
+  allRadios.forEach(radio => {
+    if (
+      radio !== selectedRadio && // Don't deselect the currently selected radio
+      radio.value === selectedRank.toString() &&
+      radio.checked
+    ) {
+      radio.checked = false; // Uncheck the radio button with the same rank
+    }
+  });
+}
 // Prevent duplicate ranks
 function updateRanks(optionsDiv, selectedRank) {
   const allRadios = optionsDiv.querySelectorAll("input");
