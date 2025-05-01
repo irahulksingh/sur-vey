@@ -1,3 +1,5 @@
+require('dotenv').config(); // Load environment variables from .env file
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const { MongoClient } = require("mongodb");
@@ -5,16 +7,15 @@ const { MongoClient } = require("mongodb");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// MongoDB connection URI (replace <username> and <password> with your credentials)
-const MONGO_URI = process.env.MONGO_URI;
-const DATABASE_NAME = "surveyDB"; // Name of your database
+// MongoDB connection URI
+const MONGO_URI = process.env.MONGO_URI; // The connection string is stored in an environment variable
+const DATABASE_NAME = "surveyDB";
 
-// Middleware for parsing JSON and serving static files
-app.use(bodyParser.json());
-app.use(express.static("public"));
-
-// MongoDB client
 let db;
+
+// Middleware
+app.use(bodyParser.json());
+app.use(express.static("public")); // Serve static files from the "public" directory
 
 // Connect to MongoDB Atlas
 (async function connectDB() {
@@ -28,29 +29,22 @@ let db;
   }
 })();
 
-// API: Get survey results
-app.get("/api/results", async (req, res) => {
-  try {
-    const results = await db.collection("results").find({}).toArray();
-    res.json(results);
-  } catch (err) {
-    console.error("Error fetching results:", err);
-    res.status(500).json({ error: "Failed to fetch results" });
-  }
-});
-
-// API: Submit survey
+// POST endpoint to submit survey data
 app.post("/api/submit", async (req, res) => {
   const surveyData = req.body;
 
   try {
     for (const [questionId, selectedOptions] of Object.entries(surveyData)) {
       for (const [option, rank] of Object.entries(selectedOptions)) {
+        if (typeof rank !== "number") {
+          return res.status(400).json({ error: "Invalid rank data type" });
+        }
+
         // Increment the rank counts for the given option
         await db.collection("results").updateOne(
           { questionId, option },
-          { $inc: { [`ranks.${rank}`]: 1 } }, // Increment rank count
-          { upsert: true } // Insert if document doesn't exist
+          { $inc: { [`ranks.${rank}`]: 1 } },
+          { upsert: true }
         );
       }
     }
@@ -61,7 +55,19 @@ app.post("/api/submit", async (req, res) => {
   }
 });
 
+// GET endpoint to fetch only ranks
+app.get("/api/ranks", async (req, res) => {
+  try {
+    // Fetch only the 'ranks' field from the MongoDB collection
+    const ranks = await db.collection("results").find({}, { projection: { ranks: 1, _id: 0 } }).toArray();
+    res.json(ranks); // Return the ranks array
+  } catch (err) {
+    console.error("Error fetching ranks:", err);
+    res.status(500).json({ error: "Failed to fetch ranks" });
+  }
+});
+
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
